@@ -1,0 +1,1158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1150</width>
+    <height>800</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Hệ Thống Quản Lý Khách Sạn (Hotel Management)</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="mainVerticalLayout">
+    <property name="spacing">
+     <number>6</number>
+    </property>
+    <property name="leftMargin">
+     <number>10</number>
+    </property>
+    <property name="topMargin">
+     <number>10</number>
+    </property>
+    <property name="rightMargin">
+     <number>10</number>
+    </property>
+    <property name="bottomMargin">
+     <number>10</number>
+    </property>
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>2</number>
+      </property>
+      <widget class="QWidget" name="tabRoomStatus">
+       <attribute name="title">
+        <string>🏢 Quản Lý Sơ Đồ Phòng</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="tab1Layout">
+        <item>
+         <widget class="QGroupBox" name="grpFilterRoom">
+          <property name="title">
+           <string>Bộ lọc &amp; Tìm kiếm phòng</string>
+          </property>
+          <layout class="QHBoxLayout" name="filterLayout">
+           <item>
+            <widget class="QLabel" name="lblSearchRoom">
+             <property name="text">
+              <string>Mã/Số phòng:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txtSearchRoom">
+             <property name="placeholderText">
+              <string>Nhập số phòng (vd: 101, VIP201...)</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="lblStatusFilter">
+             <property name="text">
+              <string>Trạng thái:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="cbStatusFilter">
+             <item>
+              <property name="text">
+               <string>-- Tất cả trạng thái --</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Trống (Available)</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Đang có khách (Occupied)</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Đang dọn dẹp (Cleaning)</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Đang bảo trì (Maintenance)</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="lblTypeFilter">
+             <property name="text">
+              <string>Loại phòng:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="cbTypeFilter">
+             <item>
+              <property name="text">
+               <string>-- Tất cả loại phòng --</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Phòng Đơn (Single)</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Phòng Đôi (Double)</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Phòng VIP / Suite</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnSearchRoom">
+             <property name="text">
+              <string>🔍 Lọc dữ liệu</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnRefreshRooms">
+             <property name="text">
+              <string>🔄 Làm mới</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="tableRooms">
+          <property name="editTriggers">
+           <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+          </property>
+          <property name="alternatingRowColors">
+           <bool>true</bool>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+          </property>
+          <attribute name="horizontalHeaderDefaultSectionSize">
+           <number>170</number>
+          </attribute>
+          <column>
+           <property name="text">
+            <string>Số Phòng</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Loại Phòng</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Tầng</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Đơn Giá / Ngày (VNĐ)</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Trạng Thái</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Khách Đang Ở</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="roomActionsLayout">
+          <item>
+           <widget class="QPushButton" name="btnQuickCheckIn">
+            <property name="text">
+             <string>📥 Check-in Nhanh</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnQuickCheckOut">
+            <property name="text">
+             <string>📤 Check-out &amp; Thanh toán</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnSetCleaning">
+            <property name="text">
+             <string>🧹 Chuyển Dọn Dẹp / Xong</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="spacerTab1">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnAddRoom">
+            <property name="text">
+             <string>➕ Thêm Phòng Mới</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnEditRoom">
+            <property name="text">
+             <string>✏️ Sửa Thông Tin</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnDeleteRoom">
+            <property name="text">
+             <string>🗑️ Xóa Phòng</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabBooking">
+       <attribute name="title">
+        <string>📝 Đặt Phòng &amp; Check-In</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="tab2MainLayout">
+        <item>
+         <widget class="QGroupBox" name="grpGuestInfo">
+          <property name="title">
+           <string>Thông Tin Đăng Ký Đặt Phòng</string>
+          </property>
+          <layout class="QFormLayout" name="formBookingLayout">
+           <item row="0" column="0">
+            <widget class="QLabel" name="lblGuestName">
+             <property name="text">
+              <string>Họ và tên khách:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="txtGuestName"/>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="lblGuestID">
+             <property name="text">
+              <string>CCCD / Passport:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="txtGuestID"/>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="lblGuestPhone">
+             <property name="text">
+              <string>Số điện thoại:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QLineEdit" name="txtGuestPhone"/>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="lblSelectRoom">
+             <property name="text">
+              <string>Chọn phòng trống:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QComboBox" name="cbSelectRoom"/>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="lblCheckInDate">
+             <property name="text">
+              <string>Ngày nhận phòng:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QDateTimeEdit" name="dtCheckIn">
+             <property name="dateTime">
+              <datetime>
+               <hour>0</hour>
+               <minute>0</minute>
+               <second>0</second>
+               <year>2026</year>
+               <month>9</month>
+               <day>20</day>
+              </datetime>
+             </property>
+             <property name="calendarPopup">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QLabel" name="lblCheckOutDate">
+             <property name="text">
+              <string>Ngày trả phòng (dự kiến):</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QDateTimeEdit" name="dtCheckOut">
+             <property name="dateTime">
+              <datetime>
+               <hour>0</hour>
+               <minute>0</minute>
+               <second>0</second>
+               <year>2026</year>
+               <month>9</month>
+               <day>20</day>
+              </datetime>
+             </property>
+             <property name="calendarPopup">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0">
+            <widget class="QLabel" name="lblDeposit">
+             <property name="text">
+              <string>Tiền cọc (VNĐ):</string>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="0">
+            <widget class="QLabel" name="lblNotes">
+             <property name="text">
+              <string>Ghi chú đặc biệt:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="1">
+            <layout class="QHBoxLayout" name="bookingBtnLayout">
+             <item>
+              <widget class="QPushButton" name="btnConfirmBooking">
+               <property name="text">
+                <string>✅ Nhận Phòng (Check-in)</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnResetBooking">
+               <property name="text">
+                <string>❌ Hủy / Làm Lại</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="6" column="1">
+            <widget class="QDoubleSpinBox" name="spinDeposit">
+             <property name="minimum">
+              <double>500000.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>999999999.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>50000.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="1">
+            <widget class="QPlainTextEdit" name="txtBookingNotes"/>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="grpCurrentBookings">
+          <property name="title">
+           <string>Danh Sách Khách Đang Lưu Trú</string>
+          </property>
+          <layout class="QVBoxLayout" name="currentBookingsLayout">
+           <item>
+            <widget class="QTableWidget" name="tableBookings">
+             <property name="editTriggers">
+              <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+             </property>
+             <property name="alternatingRowColors">
+              <bool>true</bool>
+             </property>
+             <property name="selectionBehavior">
+              <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+             </property>
+             <column>
+              <property name="text">
+               <string>Khách Hàng</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>CCCD</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Số điện thoại</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Phòng</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Ngày Đến</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Ngày Đi Dự Kiến</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Tiền Cọc</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabBilling">
+       <attribute name="title">
+        <string>💳 Dịch Vụ &amp; Hóa Đơn (Billing)</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="tab3MainLayout" stretch="1,1">
+        <item>
+         <widget class="QGroupBox" name="grpServiceInput">
+          <property name="title">
+           <string>Gọi Dịch Vụ Cho Phòng</string>
+          </property>
+          <layout class="QFormLayout" name="serviceFormLayout">
+           <item row="0" column="0">
+            <widget class="QLabel" name="lblServiceRoom">
+             <property name="text">
+              <string>Chọn phòng:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QComboBox" name="cbServiceRoom"/>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="lblServiceName">
+             <property name="text">
+              <string>Tên dịch vụ:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QComboBox" name="cbServiceName">
+             <item>
+              <property name="text">
+               <string>Nước ngọt / Bia mini-bar</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Giặt ủi quần áo</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Bữa sáng tại phòng</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Dịch vụ xe đưa đón sân bay</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Spa / Massage</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="lblServiceQty">
+             <property name="text">
+              <string>Số lượng:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QSpinBox" name="spinServiceQty">
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="value">
+              <number>1</number>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="lblServicePrice">
+             <property name="text">
+              <string>Đơn giá (VNĐ):</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QDoubleSpinBox" name="spinServicePrice">
+             <property name="maximum">
+              <double>999999999.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>10000.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QPushButton" name="btnAddService">
+             <property name="text">
+              <string>➕ Thêm Dịch Vụ Vào Phòng</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0" colspan="2">
+            <widget class="QTableWidget" name="tableRoomServices">
+             <property name="editTriggers">
+              <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+             </property>
+             <property name="alternatingRowColors">
+              <bool>true</bool>
+             </property>
+             <attribute name="horizontalHeaderDefaultSectionSize">
+              <number>126</number>
+             </attribute>
+             <attribute name="verticalHeaderDefaultSectionSize">
+              <number>50</number>
+             </attribute>
+             <column>
+              <property name="text">
+               <string>Tên Dịch Vụ</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>SL</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Đơn Giá</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Thành Tiền</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="grpBillCalculation">
+          <property name="title">
+           <string>Chi Tiết Thanh Toán Hóa Đơn</string>
+          </property>
+          <layout class="QFormLayout" name="billFormLayout">
+           <property name="verticalSpacing">
+            <number>5</number>
+           </property>
+           <item row="0" column="0">
+            <widget class="QLabel" name="lblStayGuest">
+             <property name="text">
+              <string>Khách hàng:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="valStayGuest">
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="lblStayPhone">
+             <property name="text">
+              <string>Số điện thoại:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="valStayPhone">
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="lblStayRoomType">
+             <property name="text">
+              <string>Loại phòng:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QLineEdit" name="valStayRoomType">
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="lblStayRate">
+             <property name="text">
+              <string>Đơn giá / đêm:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QLineEdit" name="valStayRate">
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="lblStayCheckIn">
+             <property name="text">
+              <string>Ngày check-in:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QLineEdit" name="valStayCheckIn">
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QLabel" name="lblStayPlannedCheckOut">
+             <property name="text">
+              <string>Check-out dự kiến:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QLineEdit" name="valStayPlannedCheckOut">
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0">
+            <widget class="QLabel" name="lblStayCheckOut">
+             <property name="text">
+              <string>Check-out thực tế:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="1">
+            <widget class="QLineEdit" name="valStayCheckOut">
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="0">
+            <widget class="QLabel" name="lblStayNights">
+             <property name="text">
+              <string>Số đêm ở:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="1">
+            <widget class="QLineEdit" name="valStayNights">
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="0" colspan="2">
+            <widget class="Line" name="lineSep1">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="9" column="0">
+            <widget class="QLabel" name="lblRoomCharge">
+             <property name="text">
+              <string>Tiền phòng:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="9" column="1">
+            <widget class="QLineEdit" name="txtRoomCharge">
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="0">
+            <widget class="QLabel" name="lblTotalServiceCharge">
+             <property name="text">
+              <string>Tiền dịch vụ:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="1">
+            <widget class="QLineEdit" name="txtServiceCharge">
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="11" column="0">
+            <widget class="QLabel" name="lblPrepaid">
+             <property name="text">
+              <string>Đã đặt cọc:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="11" column="1">
+            <widget class="QLineEdit" name="txtPrepaidDeposit">
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="12" column="0">
+            <widget class="QLabel" name="lblDiscount">
+             <property name="text">
+              <string>Giảm giá / Ưu đãi (%):</string>
+             </property>
+            </widget>
+           </item>
+           <item row="12" column="1">
+            <widget class="QSpinBox" name="spinDiscount">
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+             </property>
+             <property name="maximum">
+              <number>100</number>
+             </property>
+            </widget>
+           </item>
+           <item row="13" column="0">
+            <widget class="QLabel" name="lblTotalAmount">
+             <property name="font">
+              <font>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>TỔNG CẦN THANH TOÁN:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="13" column="1">
+            <widget class="QLineEdit" name="txtFinalTotal">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>38</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QLineEdit { background-color: rgba(127,127,127,0.12); border: none; border-radius: 6px; padding: 2px 8px; }</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="14" column="0" colspan="2">
+            <widget class="Line" name="lineSep2">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="15" column="0">
+            <widget class="QLabel" name="lblPaymentMethod">
+             <property name="text">
+              <string>Phương thức:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="15" column="1">
+            <widget class="QComboBox" name="cbPaymentMethod">
+             <item>
+              <property name="text">
+               <string>Tiền mặt</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Chuyển khoản</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="16" column="0">
+            <widget class="QLabel" name="lblBillNotes">
+             <property name="text">
+              <string>Ghi chú hóa đơn:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="16" column="1">
+            <widget class="QPlainTextEdit" name="txtBillNotes">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>36</height>
+              </size>
+             </property>
+             <property name="placeholderText">
+              <string>VD: xuất hóa đơn công ty, mã số thuế...</string>
+             </property>
+            </widget>
+           </item>
+           <item row="17" column="0" colspan="2">
+            <layout class="QHBoxLayout" name="billActionsLayout" stretch="2,1">
+             <item>
+              <widget class="QPushButton" name="btnCheckOutAndPrint">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>38</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>🧾 Thanh Toán</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnCancelBill">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>38</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>↩️ Hủy Giao Dịch</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabReports">
+       <attribute name="title">
+        <string>📊 Thống Kê &amp; Báo Cáo</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="tab4MainLayout">
+        <item>
+         <layout class="QHBoxLayout" name="reportFilterLayout">
+          <item>
+           <widget class="QLabel" name="lblFromDate">
+            <property name="text">
+             <string>Từ ngày:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDateEdit" name="dtReportFrom">
+            <property name="calendarPopup">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblToDate">
+            <property name="text">
+             <string>Đến ngày:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDateEdit" name="dtReportTo">
+            <property name="calendarPopup">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnGenerateReport">
+            <property name="text">
+             <string>📈 Xem Báo Cáo</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnExportReportExcel">
+            <property name="text">
+             <string>📥 Xuất File Báo Cáo</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="spacerTab4">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="kpiCardsLayout">
+          <item>
+           <widget class="QGroupBox" name="grpKPI1">
+            <property name="title">
+             <string>Tổng Doanh Thu</string>
+            </property>
+            <layout class="QVBoxLayout" name="kpi1VLayout">
+             <item>
+              <widget class="QLabel" name="lblTotalRevenueVal">
+               <property name="font">
+                <font>
+                 <pointsize>14</pointsize>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>0 VNĐ</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="grpKPI2">
+            <property name="title">
+             <string>Tỷ Lệ Lấp Đầy (Occupancy)</string>
+            </property>
+            <layout class="QVBoxLayout" name="kpi2VLayout">
+             <item>
+              <widget class="QLabel" name="lblOccupancyVal">
+               <property name="font">
+                <font>
+                 <pointsize>14</pointsize>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>0 %</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="grpKPI3">
+            <property name="title">
+             <string>Lượt Khách Phục Vụ</string>
+            </property>
+            <layout class="QVBoxLayout" name="kpi3VLayout">
+             <item>
+              <widget class="QLabel" name="lblGuestCountVal">
+               <property name="font">
+                <font>
+                 <pointsize>14</pointsize>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>0 lượt</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="tableReportDetail">
+          <property name="alternatingRowColors">
+           <bool>true</bool>
+          </property>
+          <column>
+           <property name="text">
+            <string>Ngày</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Số Hóa Đơn</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Doanh Thu Phòng</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Doanh Thu Dịch Vụ</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Tổng Thu</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1150</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuSystem">
+    <property name="title">
+     <string>Hệ thống</string>
+    </property>
+    <addaction name="actionChangePassword"/>
+    <addaction name="actionSettings"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Trợ giúp</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
+   <addaction name="menuSystem"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionChangePassword">
+   <property name="text">
+    <string>Đổi mật khẩu</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="text">
+    <string>Cấu hình hệ thống</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Thoát</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>Giới thiệu phần mềm</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
