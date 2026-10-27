@@ -165,17 +165,7 @@
    </item>
    <item>
     <property name="text">
-     <string>Đang có khách (Occupied)</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
      <string>Đang dọn dẹp (Cleaning)</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Đang bảo trì (Maintenance)</string>
     </property>
    </item>
   </widget>

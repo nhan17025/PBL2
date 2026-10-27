@@ -33,7 +33,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>5</number>
       </property>
       <widget class="QWidget" name="tabRoomStatus">
        <attribute name="title">
@@ -199,20 +199,6 @@
         </item>
         <item>
          <layout class="QHBoxLayout" name="roomActionsLayout">
-          <item>
-           <widget class="QPushButton" name="btnQuickCheckIn">
-            <property name="text">
-             <string>📥 Check-in Nhanh</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnQuickCheckOut">
-            <property name="text">
-             <string>📤 Check-out &amp; Thanh toán</string>
-            </property>
-           </widget>
-          </item>
           <item>
            <widget class="QPushButton" name="btnSetCleaning">
             <property name="text">
@@ -552,12 +538,9 @@
             </widget>
            </item>
            <item row="3" column="1">
-            <widget class="QDoubleSpinBox" name="spinServicePrice">
-             <property name="maximum">
-              <double>999999999.000000000000000</double>
-             </property>
-             <property name="singleStep">
-              <double>10000.000000000000000</double>
+            <widget class="QLineEdit" name="spinServicePrice">
+             <property name="readOnly">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -873,68 +856,8 @@
              </item>
             </widget>
            </item>
-           <item row="16" column="0">
-            <widget class="QLabel" name="lblCustomerPaid">
-             <property name="text">
-              <string>Khách đưa (VNĐ):</string>
-             </property>
-            </widget>
-           </item>
-           <item row="16" column="1">
-            <widget class="QDoubleSpinBox" name="spinCustomerPaid">
-             <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-             </property>
-             <property name="decimals">
-              <number>0</number>
-             </property>
-             <property name="maximum">
-              <double>999999999.000000000000000</double>
-             </property>
-             <property name="singleStep">
-              <double>50000.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="17" column="0">
-            <widget class="QLabel" name="lblChange">
-             <property name="text">
-              <string>Tiền thừa trả khách:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="17" column="1">
-            <widget class="QLineEdit" name="txtChange">
-             <property name="alignment">
-              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="18" column="0">
-            <widget class="QLabel" name="lblBillNotes">
-             <property name="text">
-              <string>Ghi chú hóa đơn:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="18" column="1">
-            <widget class="QPlainTextEdit" name="txtBillNotes">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>36</height>
-              </size>
-             </property>
-             <property name="placeholderText">
-              <string>VD: xuất hóa đơn công ty, mã số thuế...</string>
-             </property>
-            </widget>
-           </item>
-           <item row="19" column="0" colspan="2">
-            <layout class="QHBoxLayout" name="billActionsLayout" stretch="2,1">
+           <item row="16" column="0" colspan="2">
+            <layout class="QHBoxLayout" name="billActionsLayout" stretch="2">
              <item>
               <widget class="QPushButton" name="btnCheckOutAndPrint">
                <property name="minimumSize">
@@ -945,19 +868,6 @@
                </property>
                <property name="text">
                 <string>🧾 Thanh Toán &amp; Xuất Hóa Đơn</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="btnCancelBill">
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>38</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>↩️ Hủy Giao Dịch</string>
                </property>
               </widget>
              </item>
@@ -1183,7 +1093,7 @@
           <item>
            <widget class="QLineEdit" name="txtSearchHistory">
             <property name="placeholderText">
-             <string>Tìm theo tên khách, CCCD hoặc số phòng...</string>
+             <string>CCCD</string>
             </property>
            </widget>
           </item>
@@ -1220,6 +1130,11 @@
           <column>
            <property name="text">
             <string>Khách Hàng</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>CCCD</string>
            </property>
           </column>
           <column>
@@ -1327,6 +1242,9 @@
                <property name="selectionBehavior">
                 <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
                </property>
+               <attribute name="horizontalHeaderCascadingSectionResizes">
+                <bool>false</bool>
+               </attribute>
                <attribute name="horizontalHeaderStretchLastSection">
                 <bool>true</bool>
                </attribute>
@@ -1444,18 +1362,13 @@
                </column>
                <column>
                 <property name="text">
-                 <string>Đơn Vị</string>
-                </property>
-               </column>
-               <column>
-                <property name="text">
                  <string>Đơn Giá (VNĐ)</string>
                 </property>
                </column>
               </widget>
              </item>
              <item>
-              <layout class="QHBoxLayout" name="serviceCatRowLayout" stretch="0,4,0,1,0,2,0">
+              <layout class="QHBoxLayout" name="serviceCatRowLayout" stretch="0,4,0,2,0">
                <item>
                 <widget class="QLabel" name="lblServiceCatName">
                  <property name="text">
@@ -1471,26 +1384,31 @@
                    <height>0</height>
                   </size>
                  </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLabel" name="lblServiceCatUnit">
-                 <property name="text">
-                  <string>Đơn vị tính:</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="txtServiceCatUnit">
-                 <property name="maximumSize">
-                  <size>
-                   <width>110</width>
-                   <height>16777215</height>
-                  </size>
-                 </property>
-                 <property name="readOnly">
-                  <bool>true</bool>
-                 </property>
+                 <item>
+                  <property name="text">
+                   <string>Nước ngọt / Bia mini-bar</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Giặt ủi quần áo</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Bữa sáng tại phòng</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Dịch vụ xe đưa đón sân bay</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Spa / Massage</string>
+                  </property>
+                 </item>
                 </widget>
                </item>
                <item>
@@ -1518,7 +1436,7 @@
                   <double>999999999.000000000000000</double>
                  </property>
                  <property name="singleStep">
-                  <double>10000.000000000000000</double>
+                  <double>5000.000000000000000</double>
                  </property>
                 </widget>
                </item>

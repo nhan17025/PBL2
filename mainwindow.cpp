@@ -6,13 +6,19 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QDateTime>
+#include <QHeaderView>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this); // Thiết lập các thành phần giao diện từ file .ui
+    ui->tableRooms->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableRoomTypePrice->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    ui->tableRoomTypePrice->horizontalHeader()->setStretchLastSection(true);
+    ui->tableServicePrice->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    ui->tableServicePrice->horizontalHeader()->setStretchLastSection(true);
+    loadguest();
     loadRooms();
     loadAvaiRooms();
-    loadguest();
     loadORooms();
     loadRoomServices();
     showRoomServices();
@@ -24,6 +30,20 @@ MainWindow::MainWindow(QWidget *parent)
     } else {
         loadRoomPrices();
     }
+    QFile file2("serviceprice.json");
+    if (!file2.exists() || file2.size() == 0) {
+        initServicePrices();
+        saveServicePrices();
+    } else {
+        loadServicePrices();
+    }
+    on_cbServiceName_currentIndexChanged(0);
+    loadHistory();
+    ui->dtHistoryFrom->setDate(QDate::currentDate().addDays(-30));
+    ui->dtHistoryTo->setDate(QDate::currentDate());
+    ui->dtCheckIn->setDateTime(QDateTime::currentDateTime());
+    ui->dtCheckIn->setEnabled(false);
+    ui->dtCheckOut->setDateTime(QDateTime::currentDateTime().addDays(1));
 }
 
 MainWindow::~MainWindow() {
@@ -229,21 +249,29 @@ void MainWindow::loadRooms(){
         int floor = room.getroomfloor();
         double price = room.getroomprice();
         QString state = room.getroomstate();
-
+        QString tenKhach = "";
+        if (state == "Đang có khách (Occupied)") {
+            for (const guest &khach : guests) {
+                if (khach.getroom() == roomnumber) {
+                    tenKhach = khach.getgname();
+                    break;
+                }
+            }
+        }
         ui->tableRooms->setItem(row, 0, new QTableWidgetItem(roomnumber));
         ui->tableRooms->setItem(row, 1, new QTableWidgetItem(roomtype));
         ui->tableRooms->setItem(row, 2, new QTableWidgetItem(QString::number(floor)));
         ui->tableRooms->setItem(row, 3, new QTableWidgetItem(QString::number(price,'f',0)));
         ui->tableRooms->setItem(row, 4, new QTableWidgetItem(state));
-
+        ui->tableRooms->setItem(row, 5, new QTableWidgetItem(tenKhach));
     }
 
 }
 void MainWindow::on_btnAddRoom_clicked()
 {
-    RoomDialog dialog(false, this);
+    RoomDialog dialog(rooms,false, this);
+    dialog.setRoomPrices(roomPrices);
     if (dialog.exec() == QDialog::Accepted) {
-
         QString roomnumber = dialog.getRoomNumber();
         QString roomtype = dialog.getRoomType();
         int floor = dialog.getFloor();
@@ -257,7 +285,6 @@ void MainWindow::on_btnAddRoom_clicked()
         room.setfloor(floor);
         room.setprice(price);
         room.setstate(state);
-
 
         rooms.append(room);
         saveRooms();
@@ -285,7 +312,8 @@ void MainWindow::on_btnDeleteRoom_clicked(){
     loadORooms();
 }
 void MainWindow::on_btnEditRoom_clicked(){
-    RoomDialog dialog(true, this);
+    RoomDialog dialog(rooms,true, this);
+    dialog.setRoomPrices(roomPrices);
     if (ui->tableRooms->rowCount() > 0) {
         int row = ui->tableRooms->currentRow();
         QString rnm = ui->tableRooms->item(row,0)->text();
@@ -347,6 +375,10 @@ void MainWindow::on_btnConfirmBooking_clicked() {
     QDateTime troom = ui->dtCheckOut->dateTime();
     double tiencoc = ui->spinDeposit->value();
     QString roomdata = ui->cbSelectRoom->currentData().toString();
+    if (gname.isEmpty() || cccd.isEmpty() || sdt.isEmpty()) {
+        QMessageBox::warning(this, "Thiếu thông tin", "Vui lòng nhập đầy đủ Tên khách hàng, SDT và số CCCD trước khi nhận phòng");
+        return;
+    }
     khach.setgname(gname);
     khach.setcccd(cccd);
     khach.setsdt(sdt);
@@ -371,6 +403,10 @@ void MainWindow::on_btnConfirmBooking_clicked() {
             room.setstate("Đang có khách (Occupied)");
         }
     }
+    ui->txtGuestName->clear();
+    ui->txtGuestID->clear();
+    ui->txtGuestPhone->clear();
+    ui->spinDeposit->setValue(0);
     saveRooms();
     loadRooms();
     loadAvaiRooms();
@@ -382,7 +418,7 @@ void MainWindow::on_btnAddService_clicked(){
     Service sv;
     rsv.setroom(ui->cbServiceRoom->currentData().toString());
     sv.setsl(ui->spinServiceQty->value());
-    sv.setdg(ui->spinServicePrice->value());
+    sv.setdg(ui->spinServicePrice->text().toDouble());
     sv.setdv(ui->cbServiceName->currentText());
     int i=0;
     for (RoomServices &rsvs : roomservices){
@@ -429,6 +465,23 @@ void MainWindow::loadBill(){
     guest khachb;
     Room roomb;
     QString phong = ui->cbServiceRoom->currentData().toString();
+    if (phong.isEmpty()) {
+        ui->valStayGuest->clear();
+        ui->valStayPhone->clear();
+        ui->valStayRoomType->clear();
+        ui->valStayRate->clear();
+        ui->valStayCheckIn->clear();
+        ui->valStayPlannedCheckOut->clear();
+        ui->valStayCheckOut->clear();
+        ui->valStayNights->clear();
+
+        ui->txtRoomCharge->setText("0");
+        ui->txtServiceCharge->setText("0");
+        ui->txtPrepaidDeposit->setText("0");
+        ui->txtFinalTotal->setText("0");
+        ui->spinDiscount->setValue(0);
+        return;
+    }
     for (const guest &khach : guests){
         if (khach.getroom() == phong){
             khachb = khach;
@@ -531,8 +584,275 @@ void MainWindow::on_btnUpdateRoomType_clicked(){
             roompr.setPrice(price);
             saveRoomPrices();
             loadRoomPrices();
+            for (Room &room : rooms) {
+                if (room.getroomType() == roomType) {
+                    room.setprice(price);
+                }
+            }
+            saveRooms();
+            loadRooms();
+            loadAvaiRooms();
+            loadORooms();
             return;
         }
     }
 }
+void MainWindow::initServicePrices(){
+    servicePrices.clear();
+    servicePrices.append(serviceprice("Nước ngọt / Bia mini-bar",20000));
+    servicePrices.append(serviceprice("Giặt ủi quần áo",15000));
+    servicePrices.append(serviceprice("Bữa sáng tại phòng",50000));
+    servicePrices.append(serviceprice("Dịch vụ xe đưa đón sân bay",200000));
+    servicePrices.append(serviceprice("Spa / Massage",120000));
+}
+void MainWindow::loadServicePrices(){
+    QFile file ("serviceprice.json");
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        return;
+    }
+    QByteArray data = file.readAll();
+    file.close();
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    if (!doc.isArray())
+    {
+        return;
+    }
+    QJsonArray array = doc.array();
+    servicePrices.clear();
+    for (const QJsonValue &value : array) {
+        QJsonObject obj = value.toObject();
+        serviceprice svpr(obj["namedv"].toString(),obj["price"].toDouble());
+        servicePrices.append(svpr);
+    }
+    ui->tableServicePrice->setRowCount(0);
+    for (const serviceprice &svpr : servicePrices){
+        int row = ui->tableServicePrice->rowCount();
+        ui->tableServicePrice->insertRow(row);
+        QString dv = svpr.getnamedv();
+        double price = svpr.getprice();
+        ui->tableServicePrice->setItem(row, 0, new QTableWidgetItem(dv));
+        ui->tableServicePrice->setItem(row, 1, new QTableWidgetItem(QString::number(price, 'f', 0)));
+    }
+}
+void MainWindow::saveServicePrices() {
+    QJsonArray array;
+    for (const serviceprice &svpr : servicePrices){
+        QJsonObject ob;
+        ob["namedv"] = svpr.getnamedv();
+        ob["price"] = svpr.getprice();
+        array.append(ob);
+    }
+    QJsonDocument doc(array);
+    QFile file ("serviceprice.json");
+    if (file.open(QIODevice::WriteOnly))
+    {
+        file.write(doc.toJson());
+        file.close();
+    }
+}
+void MainWindow::on_btnUpdateServiceCat_clicked(){
+    double price = ui->spinServiceCatPrice->value();
+    QString sv = ui->cbServiceCatName->currentText();
+    for (serviceprice &svpr : servicePrices){
+        if (svpr.getnamedv() == sv) {
+            svpr.setprice(price);
+            saveServicePrices();
+            loadServicePrices();
+            for (RoomServices &svs : roomservices){
+                svs.updateServicePrice(sv,price);
+            }
+            saveRoomServices();
+            loadRoomServices();
+            showRoomServices();
+            loadBill();
+            QString tenDichVu = ui->cbServiceName->currentText();
+            for (const serviceprice &svpr : servicePrices) {
+                if (svpr.getnamedv() == tenDichVu) {
+                    ui->spinServicePrice->setText(QString::number(svpr.getprice(), 'f', 0));
+                    break;
+                }
+            }
+            return;
+        }
+    }
+}
+void MainWindow::on_cbServiceName_currentIndexChanged(int)
+{
+    QString tenDichVu = ui->cbServiceName->currentText();
+    for (const serviceprice &svpr : servicePrices) {
+        if (svpr.getnamedv() == tenDichVu) {
+            ui->spinServicePrice->setText(QString::number(svpr.getprice(), 'f', 0));
+            break;
+        }
+    }
+}
+void MainWindow::on_btnCheckOutAndPrint_clicked() {
+    QString phong = ui->cbServiceRoom->currentData().toString();
+    if (phong.isEmpty()) return;
+    double tongTien = ui->txtFinalTotal->text().toDouble();
+    QString phuongThuc = ui->cbPaymentMethod->currentText();
+    PaymentMethod* payment = nullptr;
+    if (phuongThuc == "Tiền mặt") {
+        payment = new CashPayment();
+    } else if (phuongThuc == "Chuyển khoản") {
+        payment = new TransferPayment();
+    }
+    if (payment != nullptr) {
+        bool thanhcong = payment->processPayment(tongTien);
+        delete payment;
+        if (!thanhcong) {
+            return;
+        }
+    }
+    QString cccdKhach;
+    for (const guest &k : guests) {
+        if (k.getroom() == phong) {
+            cccdKhach = k.getcccd();
+            break;
+        }
+    }
+    History newBill;
+    newBill.setGuestName(ui->valStayGuest->text());
+    newBill.setCccd(cccdKhach);
+    newBill.setRoomNumber(phong);
+    newBill.setCheckIn(QDateTime::fromString(ui->valStayCheckIn->text(), "dd/MM/yyyy HH:mm"));
+    newBill.setCheckOut(QDateTime::currentDateTime());
+    newBill.setRoomCharge(ui->txtRoomCharge->text().toDouble());
+    newBill.setServiceCharge(ui->txtServiceCharge->text().toDouble());
+    newBill.setDiscount(ui->spinDiscount->value());
+    newBill.setTotalAmount(tongTien);
+    newBill.setPaymentMethod(phuongThuc);
+    histories.append(newBill);
+    saveHistory();
+    showHistory();
+    for (int i = 0; i < roomservices.size(); ++i) {
+        if (roomservices[i].getroom() == phong) {
+            roomservices.removeAt(i);
+            break;
+        }
+    }
+    for (int i = 0; i < guests.size(); ++i) {
+        if (guests[i].getroom() == phong) {
+            guests.removeAt(i);
+            break;
+        }
+    }
+    for (Room &room : rooms) {
+        if (room.getroomNumber() == phong) {
+            room.setstate("Đang dọn dẹp (Cleaning)");
+            break;
+        }
+    }
+    saveRooms();
+    saveguest();
+    saveRoomServices();
+    loadRooms();
+    loadguest();
+    loadORooms();
+    loadAvaiRooms();
+    ui->cbServiceRoom->setCurrentIndex(-1);
+    ui->tableRoomServices->setRowCount(0);
+}
+void MainWindow::saveHistory() {
+    QJsonArray array;
+    for (const History &his : histories) {
+        QJsonObject ob;
+        ob["guestName"] = his.getGuestName();
+        ob["cccd"] = his.getCccd();
+        ob["roomNumber"] = his.getRoomNumber();
+        ob["checkIn"] = his.getCheckIn().toString("dd/MM/yyyy HH:mm");
+        ob["checkOut"] = his.getCheckOut().toString("dd/MM/yyyy HH:mm");
+        ob["roomCharge"] = his.getRoomCharge();
+        ob["serviceCharge"] = his.getServiceCharge();
+        ob["discount"] = his.getDiscount();
+        ob["totalAmount"] = his.getTotalAmount();
+        ob["paymentMethod"] = his.getPaymentMethod();
+        ob["note"] = his.getNote();
+        array.append(ob);
+    }
+    QJsonDocument doc(array);
+    QFile file("history.json");
+    if (file.open(QIODevice::WriteOnly)) {
+        file.write(doc.toJson());
+        file.close();
+    }
+}
 
+void MainWindow::loadHistory() {
+    QFile file("history.json");
+    if (!file.open(QIODevice::ReadOnly)) return;
+
+    QByteArray data = file.readAll();
+    file.close();
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    if (!doc.isArray()) return;
+
+    QJsonArray array = doc.array();
+    histories.clear();
+    for (const QJsonValue &value : array) {
+        QJsonObject obj = value.toObject();
+        History his;
+        his.setGuestName(obj["guestName"].toString());
+        his.setCccd(obj["cccd"].toString());
+        his.setRoomNumber(obj["roomNumber"].toString());
+        his.setCheckIn(QDateTime::fromString(obj["checkIn"].toString(), "dd/MM/yyyy HH:mm"));
+        his.setCheckOut(QDateTime::fromString(obj["checkOut"].toString(), "dd/MM/yyyy HH:mm"));
+        his.setRoomCharge(obj["roomCharge"].toDouble());
+        his.setServiceCharge(obj["serviceCharge"].toDouble());
+        his.setDiscount(obj["discount"].toDouble());
+        his.setTotalAmount(obj["totalAmount"].toDouble());
+        his.setPaymentMethod(obj["paymentMethod"].toString());
+        his.setNote(obj["note"].toString());
+        histories.append(his);
+    }
+    showHistory();
+}
+void MainWindow::showHistory() {
+    ui->tableHistory->setRowCount(0);
+    double tongDoanhThu = 0;
+    for (const History &his : histories) {
+        int row = ui->tableHistory->rowCount();
+        ui->tableHistory->insertRow(row);
+        ui->tableHistory->setItem(row, 0, new QTableWidgetItem(his.getGuestName()));
+        ui->tableHistory->setItem(row, 1, new QTableWidgetItem(his.getCccd()));
+        ui->tableHistory->setItem(row, 2, new QTableWidgetItem(his.getRoomNumber()));
+        ui->tableHistory->setItem(row, 3, new QTableWidgetItem(his.getCheckIn().toString("dd/MM/yyyy HH:mm")));
+        ui->tableHistory->setItem(row, 4, new QTableWidgetItem(his.getCheckOut().toString("dd/MM/yyyy HH:mm")));
+        ui->tableHistory->setItem(row, 5, new QTableWidgetItem(QString::number(his.getRoomCharge(), 'f', 0)));
+        ui->tableHistory->setItem(row, 6, new QTableWidgetItem(QString::number(his.getServiceCharge(), 'f', 0)));
+        ui->tableHistory->setItem(row, 7, new QTableWidgetItem(QString::number(his.getDiscount(), 'f', 0)));
+        ui->tableHistory->setItem(row, 8, new QTableWidgetItem(QString::number(his.getTotalAmount(), 'f', 0)));
+        ui->tableHistory->setItem(row, 9, new QTableWidgetItem(his.getPaymentMethod()));
+        tongDoanhThu += his.getTotalAmount();
+    }
+    ui->lblHistoryCount->setText("Số hóa đơn: " + QString::number(histories.size()));
+    ui->lblHistoryTotal->setText("Tổng thu: " + QString::number(tongDoanhThu, 'f', 0) + " VNĐ");
+}
+void MainWindow::on_btnFilterHistory_clicked() {
+    QString search = ui->txtSearchHistory->text();
+    QDate fromDate = ui->dtHistoryFrom->date();
+    QDate toDate = ui->dtHistoryTo->date();
+    int count = 0;
+    double tongDoanhThu = 0;
+    for (int i = ui->tableHistory->rowCount() - 1; i >= 0; i--) {
+        QString chuoiNgay = ui->tableHistory->item(i, 4)->text();
+        QDate ngayTra = QDateTime::fromString(chuoiNgay, "dd/MM/yyyy HH:mm").date();
+        QString cccd = ui->tableHistory->item(i, 1)->text();
+        if ((ui->tableHistory->item(i,1)->text() == search  || search == "") && (ngayTra >= fromDate) && (ngayTra <= toDate)) {
+            ui->tableHistory->setRowHidden(i, false);
+            count++;
+            tongDoanhThu += ui->tableHistory->item(i, 8)->text().toDouble();
+        } else {
+            ui->tableHistory->setRowHidden(i, true);
+        }
+    }
+    ui->lblHistoryCount->setText("Số hóa đơn: " + QString::number(count));
+    ui->lblHistoryTotal->setText("Tổng thu: " + QString::number(tongDoanhThu, 'f', 0) + " VNĐ");
+}
+void MainWindow::on_btnRefreshHistory_clicked() {
+    ui->txtSearchHistory->clear();
+    ui->dtHistoryFrom->setDate(QDate::currentDate().addDays(-30));
+    ui->dtHistoryTo->setDate(QDate::currentDate());
+    showHistory();
+}

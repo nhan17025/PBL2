@@ -1,8 +1,10 @@
 #include "roomdialog.h"
 #include "ui_roomdialog.h"
+#include <QMessageBox>
 
-RoomDialog::RoomDialog(bool editMode, QWidget *parent)
+RoomDialog::RoomDialog(const QVector<Room> &rooms,bool editMode, QWidget *parent)
     : QDialog(parent)
+    , rooms(rooms)
     , ui(new Ui::RoomDialog)
     , editMode(editMode)
 {
@@ -32,6 +34,19 @@ QString RoomDialog::getState() const {
     return ui->cbState->currentText();
 }
 void RoomDialog::on_btnAdd_clicked(){
+    QString roomNumber = ui->txtRoomNumber->text().trimmed();
+
+    if (roomNumber.isEmpty()) {
+        QMessageBox::warning(this, "Lỗi", "Vui lòng nhập số phòng!");
+        return;
+    }
+    for (const Room &room : rooms) {
+        if (room.getroomNumber() == roomNumber && editMode == false) {
+            QMessageBox::warning(this, "Lỗi",
+                                 "Số phòng đã tồn tại!");
+            return;
+        }
+    }
     accept();
 }
 void RoomDialog::on_btnCancel_clicked(){
@@ -43,8 +58,36 @@ void RoomDialog::setRoomData(QString &roomnumber, QString &roomtype, int floor, 
     ui->spinFloor->setValue(floor);
     ui->spinPrice->setText(QString::number(price, 'f', 0));
     int index = ui->cbState->findText(state);
-
     if (index != -1) {
         ui->cbState->setCurrentIndex(index);
+    } else {
+        ui->cbState->addItem(state);
+        ui->cbState->setCurrentText(state);
     }
+    if (state == "Đang có khách (Occupied)") {
+        ui->cbState->setEnabled(false);
+        ui->txtRoomNumber->setEnabled(false);
+        ui->cbRoomType->setEnabled(false);
+        ui->spinFloor->setEnabled(false);
+    } else {
+        ui->cbState->setEnabled(true);
+        ui->txtRoomNumber->setEnabled(true);
+        ui->cbRoomType->setEnabled(true);
+        ui->spinFloor->setEnabled(true);
+    }
+}
+void RoomDialog::setRoomPrices(const QVector<RoomPrice>& p) {
+    prices = p;
+    updateRoomPrice();
+}
+void RoomDialog::on_cbRoomType_currentIndexChanged(int) {
+    updateRoomPrice();
+}
+void RoomDialog::updateRoomPrice() {
+    QString roomType = ui->cbRoomType->currentText();
+    double price = 0;
+    for (const RoomPrice &rp : prices) {
+        if (rp.getRoomType() == roomType) { price = rp.getPrice(); break; }
+    }
+    ui->spinPrice->setText(QString::number(price, 'f', 0));
 }

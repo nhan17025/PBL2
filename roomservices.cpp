@@ -47,4 +47,11 @@ void Service::setdg(const double& a){
 }
 void Service::setdv(const QString& a){
     this->dv = a;
-} 
+}
+void RoomServices::updateServicePrice(QString& serviceName, double newPrice) {
+    for (int i = 0; i < service.size(); ++i) {
+        if (service[i].getdv() == serviceName) {
+            service[i].setdg(newPrice);
+        }
+    }
+}

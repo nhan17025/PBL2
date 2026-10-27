@@ -30,6 +30,7 @@ public:
     QString getroom() const;
     void addservice(const Service&);
     QVector<Service> getservice() const;
+    void updateServicePrice(QString& serviceName, double newPrice);
 };
 
 #endif // ROOMSERVICES_H
