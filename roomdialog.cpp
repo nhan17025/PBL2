@@ -26,7 +26,7 @@ int RoomDialog::getFloor() const {
     return ui->spinFloor->value();
 }
 double RoomDialog::getPrice() const {
-    return ui->spinPrice->value();
+    return ui->spinPrice->text().toDouble();
 }
 QString RoomDialog::getState() const {
     return ui->cbState->currentText();
@@ -41,7 +41,7 @@ void RoomDialog::setRoomData(QString &roomnumber, QString &roomtype, int floor, 
     ui->txtRoomNumber->setText(roomnumber);
     ui->cbRoomType->setCurrentText(roomtype);
     ui->spinFloor->setValue(floor);
-    ui->spinPrice->setValue(price);
+    ui->spinPrice->setText(QString::number(price, 'f', 0));
     int index = ui->cbState->findText(state);
 
     if (index != -1) {

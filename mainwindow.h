@@ -7,6 +7,7 @@
 #include "room.h"
 #include "guest.h"
 #include "roomservices.h"
+#include "roomprice.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -28,6 +29,7 @@ private slots:
     void on_btnAddService_clicked();
     void on_cbServiceRoom_currentIndexChanged(int);
     void on_spinDiscount_valueChanged(int);
+    void on_btnUpdateRoomType_clicked();
 private:
     Ui::MainWindow *ui;
     QVector<Room> rooms;
@@ -43,6 +45,10 @@ private:
     void loadRoomServices();
     void showRoomServices();
     void loadBill();
+    QVector<RoomPrice> roomPrices;
+    void initRoomPrices();
+    void loadRoomPrices();
+    void saveRoomPrices();
 };
 
 #endif // MAINWINDOW_H

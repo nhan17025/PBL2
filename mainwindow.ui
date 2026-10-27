@@ -866,16 +866,61 @@
                <string>Chuyển khoản</string>
               </property>
              </item>
+             <item>
+              <property name="text">
+               <string>Thẻ (POS)</string>
+              </property>
+             </item>
             </widget>
            </item>
            <item row="16" column="0">
+            <widget class="QLabel" name="lblCustomerPaid">
+             <property name="text">
+              <string>Khách đưa (VNĐ):</string>
+             </property>
+            </widget>
+           </item>
+           <item row="16" column="1">
+            <widget class="QDoubleSpinBox" name="spinCustomerPaid">
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+             </property>
+             <property name="decimals">
+              <number>0</number>
+             </property>
+             <property name="maximum">
+              <double>999999999.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>50000.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="17" column="0">
+            <widget class="QLabel" name="lblChange">
+             <property name="text">
+              <string>Tiền thừa trả khách:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="17" column="1">
+            <widget class="QLineEdit" name="txtChange">
+             <property name="alignment">
+              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="18" column="0">
             <widget class="QLabel" name="lblBillNotes">
              <property name="text">
               <string>Ghi chú hóa đơn:</string>
              </property>
             </widget>
            </item>
-           <item row="16" column="1">
+           <item row="18" column="1">
             <widget class="QPlainTextEdit" name="txtBillNotes">
              <property name="minimumSize">
               <size>
@@ -888,7 +933,7 @@
              </property>
             </widget>
            </item>
-           <item row="17" column="0" colspan="2">
+           <item row="19" column="0" colspan="2">
             <layout class="QHBoxLayout" name="billActionsLayout" stretch="2,1">
              <item>
               <widget class="QPushButton" name="btnCheckOutAndPrint">
@@ -899,7 +944,7 @@
                 </size>
                </property>
                <property name="text">
-                <string>🧾 Thanh Toán</string>
+                <string>🧾 Thanh Toán &amp; Xuất Hóa Đơn</string>
                </property>
               </widget>
              </item>
@@ -1097,6 +1142,399 @@
            </property>
           </column>
          </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabHistory">
+       <attribute name="title">
+        <string>🧾 Lịch Sử Thanh Toán</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="tab5MainLayout">
+        <item>
+         <layout class="QHBoxLayout" name="historyFilterLayout">
+          <item>
+           <widget class="QLabel" name="lblHistoryFrom">
+            <property name="text">
+             <string>Từ ngày:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDateEdit" name="dtHistoryFrom">
+            <property name="calendarPopup">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblHistoryTo">
+            <property name="text">
+             <string>Đến ngày:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDateEdit" name="dtHistoryTo">
+            <property name="calendarPopup">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="txtSearchHistory">
+            <property name="placeholderText">
+             <string>Tìm theo tên khách, CCCD hoặc số phòng...</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnFilterHistory">
+            <property name="text">
+             <string>🔍 Lọc</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnRefreshHistory">
+            <property name="text">
+             <string>🔄 Làm mới</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="tableHistory">
+          <property name="editTriggers">
+           <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+          </property>
+          <property name="alternatingRowColors">
+           <bool>true</bool>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+          </property>
+          <attribute name="horizontalHeaderStretchLastSection">
+           <bool>true</bool>
+          </attribute>
+          <column>
+           <property name="text">
+            <string>Khách Hàng</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Phòng</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Ngày Nhận</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Ngày Trả Thực Tế</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Tiền Phòng</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Tiền Dịch Vụ</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Giảm Giá (%)</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Tổng Thanh Toán</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Phương Thức</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="historyFooterLayout">
+          <item>
+           <widget class="QLabel" name="lblHistoryCount">
+            <property name="text">
+             <string>Số hóa đơn: 0</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="spacerTab5">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="lblHistoryTotal">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Tổng thu: 0 VNĐ</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabPricing">
+       <attribute name="title">
+        <string>⚙️ Quản Lý Giá &amp; Danh Mục</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="tab6MainLayout">
+        <item>
+         <layout class="QVBoxLayout" name="pricingTopLayout">
+          <item>
+           <widget class="QGroupBox" name="grpRoomTypePrice">
+            <property name="title">
+             <string>Giá Theo Loại Phòng</string>
+            </property>
+            <layout class="QVBoxLayout" name="roomTypeLayout">
+             <item>
+              <widget class="QTableWidget" name="tableRoomTypePrice">
+               <property name="editTriggers">
+                <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+               </property>
+               <property name="alternatingRowColors">
+                <bool>true</bool>
+               </property>
+               <property name="selectionBehavior">
+                <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+               </property>
+               <attribute name="horizontalHeaderStretchLastSection">
+                <bool>true</bool>
+               </attribute>
+               <column>
+                <property name="text">
+                 <string>Loại Phòng</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Đơn Giá / Đêm (VNĐ)</string>
+                </property>
+               </column>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="roomTypeRowLayout" stretch="0,3,0,1,0">
+               <item>
+                <widget class="QLabel" name="lblRoomTypeName">
+                 <property name="text">
+                  <string>Tên loại phòng:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="cbRoomTypeName">
+                 <property name="minimumSize">
+                  <size>
+                   <width>220</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <item>
+                  <property name="text">
+                   <string>Phòng Đơn (Single)</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Phòng Đôi (Double)</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Phòng VIP / Suite</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="lblRoomTypePrice">
+                 <property name="text">
+                  <string>Đơn giá / đêm (VNĐ):</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QDoubleSpinBox" name="spinRoomTypePrice">
+                 <property name="maximumSize">
+                  <size>
+                   <width>170</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                 </property>
+                 <property name="decimals">
+                  <number>0</number>
+                 </property>
+                 <property name="maximum">
+                  <double>999999999.000000000000000</double>
+                 </property>
+                 <property name="singleStep">
+                  <double>50000.000000000000000</double>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnUpdateRoomType">
+                 <property name="text">
+                  <string>💾 Cập Nhật Giá</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="grpServicePrice">
+            <property name="title">
+             <string>Bảng Giá Dịch Vụ</string>
+            </property>
+            <layout class="QVBoxLayout" name="serviceCatLayout">
+             <item>
+              <widget class="QTableWidget" name="tableServicePrice">
+               <property name="editTriggers">
+                <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+               </property>
+               <property name="alternatingRowColors">
+                <bool>true</bool>
+               </property>
+               <property name="selectionBehavior">
+                <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+               </property>
+               <attribute name="horizontalHeaderStretchLastSection">
+                <bool>true</bool>
+               </attribute>
+               <column>
+                <property name="text">
+                 <string>Tên Dịch Vụ</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Đơn Vị</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Đơn Giá (VNĐ)</string>
+                </property>
+               </column>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="serviceCatRowLayout" stretch="0,4,0,1,0,2,0">
+               <item>
+                <widget class="QLabel" name="lblServiceCatName">
+                 <property name="text">
+                  <string>Tên dịch vụ:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="cbServiceCatName">
+                 <property name="minimumSize">
+                  <size>
+                   <width>220</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="lblServiceCatUnit">
+                 <property name="text">
+                  <string>Đơn vị tính:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="txtServiceCatUnit">
+                 <property name="maximumSize">
+                  <size>
+                   <width>110</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="readOnly">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="lblServiceCatPrice">
+                 <property name="text">
+                  <string>Đơn giá (VNĐ):</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QDoubleSpinBox" name="spinServiceCatPrice">
+                 <property name="maximumSize">
+                  <size>
+                   <width>170</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                 </property>
+                 <property name="decimals">
+                  <number>0</number>
+                 </property>
+                 <property name="maximum">
+                  <double>999999999.000000000000000</double>
+                 </property>
+                 <property name="singleStep">
+                  <double>10000.000000000000000</double>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="btnUpdateServiceCat">
+                 <property name="text">
+                  <string>💾 Cập Nhật Giá</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>

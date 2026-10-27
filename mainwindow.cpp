@@ -17,6 +17,13 @@ MainWindow::MainWindow(QWidget *parent)
     loadRoomServices();
     showRoomServices();
     loadBill();
+    QFile file("roomprices.json");
+    if (!file.exists() || file.size() == 0) {
+        initRoomPrices();
+        saveRoomPrices();
+    } else {
+        loadRoomPrices();
+    }
 }
 
 MainWindow::~MainWindow() {
@@ -463,5 +470,69 @@ void MainWindow::loadBill(){
 }
 void MainWindow::on_spinDiscount_valueChanged(int index){
     loadBill();
+}
+void MainWindow::initRoomPrices() {
+    roomPrices.clear();
+    roomPrices.append(RoomPrice("Phòng Đơn (Single)", 300000));
+    roomPrices.append(RoomPrice("Phòng Đôi (Double)", 500000));
+    roomPrices.append(RoomPrice("Phòng VIP / Suite", 1000000));
+}
+void MainWindow::saveRoomPrices() {
+    QJsonArray array;
+    for (const RoomPrice &roompr : roomPrices){
+        QJsonObject ob;
+        ob["roomType"] = roompr.getRoomType();
+        ob["price"] = roompr.getPrice();
+        array.append(ob);
+    }
+    QJsonDocument doc(array);
+    QFile file ("roomprices.json");
+    if (file.open(QIODevice::WriteOnly))
+    {
+        file.write(doc.toJson());
+        file.close();
+    }
+}
+void MainWindow::loadRoomPrices(){
+    QFile file ("roomprices.json");
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        return;
+    }
+    QByteArray data = file.readAll();
+    file.close();
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    if (!doc.isArray())
+    {
+        return;
+    }
+    QJsonArray array = doc.array();
+    roomPrices.clear();
+    for (const QJsonValue &value : array) {
+        QJsonObject obj = value.toObject();
+        RoomPrice roompr(obj["roomType"].toString(),obj["price"].toDouble());
+        roomPrices.append(roompr);
+    }
+    ui->tableRoomTypePrice->setRowCount(0);
+    for (const RoomPrice &roompr : roomPrices){
+        int row = ui->tableRoomTypePrice->rowCount();
+        ui->tableRoomTypePrice->insertRow(row);
+        QString room = roompr.getRoomType();
+        double price = roompr.getPrice();
+        ui->tableRoomTypePrice->setItem(row, 0, new QTableWidgetItem(room));
+        ui->tableRoomTypePrice->setItem(row, 1, new QTableWidgetItem(QString::number(price, 'f', 0)));
+    }
+}
+void MainWindow::on_btnUpdateRoomType_clicked(){
+    double price = ui->spinRoomTypePrice->value();
+    QString roomType = ui->cbRoomTypeName->currentText();
+    for (RoomPrice &roompr : roomPrices){
+        if (roompr.getRoomType() == roomType) {
+            roompr.setPrice(price);
+            saveRoomPrices();
+            loadRoomPrices();
+            return;
+        }
+    }
 }
 
