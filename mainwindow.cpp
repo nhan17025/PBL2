@@ -316,6 +316,7 @@ void MainWindow::on_btnEditRoom_clicked(){
     dialog.setRoomPrices(roomPrices);
     if (ui->tableRooms->rowCount() > 0) {
         int row = ui->tableRooms->currentRow();
+        if (row < 0) return;
         QString rnm = ui->tableRooms->item(row,0)->text();
         QString rt = ui->tableRooms->item(row,1)->text();
         int flo = ui->tableRooms->item(row,2)->text().toInt();
@@ -414,6 +415,11 @@ void MainWindow::on_btnConfirmBooking_clicked() {
     loadORooms();
 }
 void MainWindow::on_btnAddService_clicked(){
+    QString roomNumber = ui->cbServiceRoom->currentData().toString();
+    if (roomNumber.isEmpty()) {
+        QMessageBox::warning(this, "Cảnh báo", "Vui lòng chọn phòng cần gọi dịch vụ!");
+        return;
+    }
     RoomServices rsv;
     Service sv;
     rsv.setroom(ui->cbServiceRoom->currentData().toString());
@@ -497,7 +503,7 @@ void MainWindow::loadBill(){
     ui->valStayGuest->setText(khachb.getgname());
     ui->valStayPhone->setText(khachb.getsdt());
     ui->valStayRoomType->setText(roomb.getroomType());
-    ui->valStayRate->setText(QString::number(roomb.getroomprice()));
+    ui->valStayRate->setText(QString::number(roomb.getroomprice(),'f',0));
     ui->valStayCheckIn->setText(khachb.getnroom().toString("dd/MM/yyyy HH:mm"));
     ui->valStayPlannedCheckOut->setText(khachb.gettroom().toString("dd/MM/yyyy HH:mm"));
     ui->valStayCheckOut->setText(QDateTime::currentDateTime().toString("dd/MM/yyyy HH:mm"));
@@ -514,11 +520,11 @@ void MainWindow::loadBill(){
             break;
         }
     }
-    ui->txtServiceCharge->setText(QString::number(sum));
+    ui->txtServiceCharge->setText(QString::number(sum,'f',0));
     ui->txtPrepaidDeposit->setText(QString::number(khachb.gettiencoc()));
     ui->txtRoomCharge->setText(QString::number(soNgay*roomb.getroomprice(),'f',0));
     double discount = ui->spinDiscount->value();
-    double tong = (soNgay*roomb.getroomprice() + sum) * (100 - discount)/100 - khachb.gettiencoc();
+    double tong = ((soNgay*roomb.getroomprice() + sum) - khachb.gettiencoc()) * (100 - discount)/100;
     ui->txtFinalTotal->setText(QString::number(tong,'f',0));
 }
 void MainWindow::on_spinDiscount_valueChanged(int index){
@@ -855,4 +861,14 @@ void MainWindow::on_btnRefreshHistory_clicked() {
     ui->dtHistoryFrom->setDate(QDate::currentDate().addDays(-30));
     ui->dtHistoryTo->setDate(QDate::currentDate());
     showHistory();
+}
+void MainWindow::on_btnSetCleaning_clicked(){
+    for (Room &room : rooms){
+        if (room.getroomstate() == "Đang dọn dẹp (Cleaning)") {
+            room.setstate("Trống (Available)");
+        }
+    }
+    saveRooms();
+    loadRooms();
+    loadAvaiRooms();
 }

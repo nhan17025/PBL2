@@ -42,6 +42,7 @@ private slots:
     void showHistory();
     void on_btnFilterHistory_clicked();
     void on_btnRefreshHistory_clicked();
+    void on_btnSetCleaning_clicked();
 private:
     Ui::MainWindow *ui;
     QVector<Room> rooms;
