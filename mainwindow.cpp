@@ -368,17 +368,51 @@ void MainWindow::on_btnRefreshRooms_clicked() {
 void MainWindow::on_btnConfirmBooking_clicked() {
     guest khach;
 
-    QString gname = ui->txtGuestName->text();
-    QString cccd = ui->txtGuestID->text();
-    QString sdt = ui->txtGuestPhone->text();
+    QString gname = ui->txtGuestName->text().trimmed();
+    QString cccd = ui->txtGuestID->text().trimmed();
+    QString sdt = ui->txtGuestPhone->text().trimmed();
     QString room = ui->cbSelectRoom->currentText();
-    QDateTime  nroom = ui->dtCheckIn->dateTime();
+    QDateTime  nroom = QDateTime::currentDateTime();
     QDateTime troom = ui->dtCheckOut->dateTime();
     double tiencoc = ui->spinDeposit->value();
     QString roomdata = ui->cbSelectRoom->currentData().toString();
     if (gname.isEmpty() || cccd.isEmpty() || sdt.isEmpty()) {
         QMessageBox::warning(this, "Thiếu thông tin", "Vui lòng nhập đầy đủ Tên khách hàng, SDT và số CCCD trước khi nhận phòng");
         return;
+    }
+    bool cccdHopLe = (cccd.length() == 12);
+    for (QChar ch : cccd) {
+        if (!ch.isDigit()) cccdHopLe = false;
+    }
+    if (!cccdHopLe) {
+        QMessageBox::warning(this, "Sai CCCD", "Số CCCD phải gồm đúng 12 chữ số!");
+        return;
+    }
+    bool sdtHopLe = (sdt.length() == 10 && sdt[0] == '0');
+    for (QChar ch : sdt) {
+        if (!ch.isDigit()) sdtHopLe = false;
+    }
+    if (!sdtHopLe) {
+        QMessageBox::warning(this, "Sai SĐT", "Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng 0!");
+        return;
+    }
+    if (roomdata.isEmpty()) {
+        QMessageBox::warning(this, "Chưa có phòng", "Không có phòng trống nào được chọn. Vui lòng chọn phòng trước khi nhận phòng!");
+        return;
+    }
+    if (troom <= nroom) {
+        QMessageBox::warning(this, "Sai ngày", "Ngày trả phòng dự kiến phải sau thời điểm nhận phòng!");
+        return;
+    }
+    for (const guest &k : guests) {
+        if (k.getcccd() == cccd) {
+            QMessageBox::warning(this, "Trùng CCCD", "Số CCCD này đang ở phòng " + k.getroom() + "!");
+            return;
+        }
+        if (k.getsdt() == sdt) {
+            QMessageBox::warning(this, "Trùng SĐT", "Số điện thoại này đang ở phòng " + k.getroom() + "!");
+            return;
+        }
     }
     khach.setgname(gname);
     khach.setcccd(cccd);
@@ -408,6 +442,8 @@ void MainWindow::on_btnConfirmBooking_clicked() {
     ui->txtGuestID->clear();
     ui->txtGuestPhone->clear();
     ui->spinDeposit->setValue(0);
+    ui->dtCheckIn->setDateTime(QDateTime::currentDateTime());
+    ui->dtCheckOut->setDateTime(QDateTime::currentDateTime().addDays(1));
     saveRooms();
     loadRooms();
     loadAvaiRooms();
@@ -464,6 +500,7 @@ void MainWindow::showRoomServices() {
     }
 }
 void MainWindow::on_cbServiceRoom_currentIndexChanged(int index){
+    ui->valStayCheckOut->setDateTime(QDateTime::currentDateTime());
     showRoomServices();
     loadBill();
 }
@@ -506,9 +543,8 @@ void MainWindow::loadBill(){
     ui->valStayRate->setText(QString::number(roomb.getroomprice(),'f',0));
     ui->valStayCheckIn->setText(khachb.getnroom().toString("dd/MM/yyyy HH:mm"));
     ui->valStayPlannedCheckOut->setText(khachb.gettroom().toString("dd/MM/yyyy HH:mm"));
-    ui->valStayCheckOut->setText(QDateTime::currentDateTime().toString("dd/MM/yyyy HH:mm"));
     QDateTime nhan = khachb.getnroom();
-    QDateTime tra  = QDateTime::currentDateTime();
+    QDateTime tra  = ui->valStayCheckOut->dateTime();
     qint64 soNgay = nhan.date().daysTo(tra.date());
     if (tra.time() > QTime(12, 0)) soNgay += 1;
     if (soNgay < 1) soNgay = 1;
@@ -524,7 +560,7 @@ void MainWindow::loadBill(){
     ui->txtPrepaidDeposit->setText(QString::number(khachb.gettiencoc()));
     ui->txtRoomCharge->setText(QString::number(soNgay*roomb.getroomprice(),'f',0));
     double discount = ui->spinDiscount->value();
-    double tong = ((soNgay*roomb.getroomprice() + sum) - khachb.gettiencoc()) * (100 - discount)/100;
+    double tong = (soNgay*roomb.getroomprice() + sum) * (100 - discount)/100 - khachb.gettiencoc();
     ui->txtFinalTotal->setText(QString::number(tong,'f',0));
 }
 void MainWindow::on_spinDiscount_valueChanged(int index){
@@ -696,6 +732,11 @@ void MainWindow::on_cbServiceName_currentIndexChanged(int)
 void MainWindow::on_btnCheckOutAndPrint_clicked() {
     QString phong = ui->cbServiceRoom->currentData().toString();
     if (phong.isEmpty()) return;
+    QDateTime gioNhan = QDateTime::fromString(ui->valStayCheckIn->text(), "dd/MM/yyyy HH:mm");
+    if (ui->valStayCheckOut->dateTime() < gioNhan) {
+        QMessageBox::warning(this, "Sai giờ trả phòng", "Giờ trả phòng thực tế không được trước giờ nhận phòng!");
+        return;
+    }
     double tongTien = ui->txtFinalTotal->text().toDouble();
     QString phuongThuc = ui->cbPaymentMethod->currentText();
     PaymentMethod* payment = nullptr;
@@ -723,11 +764,11 @@ void MainWindow::on_btnCheckOutAndPrint_clicked() {
     newBill.setCccd(cccdKhach);
     newBill.setRoomNumber(phong);
     newBill.setCheckIn(QDateTime::fromString(ui->valStayCheckIn->text(), "dd/MM/yyyy HH:mm"));
-    newBill.setCheckOut(QDateTime::currentDateTime());
+    newBill.setCheckOut(ui->valStayCheckOut->dateTime());
     newBill.setRoomCharge(ui->txtRoomCharge->text().toDouble());
     newBill.setServiceCharge(ui->txtServiceCharge->text().toDouble());
     newBill.setDiscount(ui->spinDiscount->value());
-    newBill.setTotalAmount(tongTien);
+    newBill.setTotalAmount(tongTien + ui->txtPrepaidDeposit->text().toDouble());
     newBill.setPaymentMethod(phuongThuc);
     histories.append(newBill);
     saveHistory();
@@ -871,4 +912,7 @@ void MainWindow::on_btnSetCleaning_clicked(){
     saveRooms();
     loadRooms();
     loadAvaiRooms();
+}
+void MainWindow::on_valStayCheckOut_dateTimeChanged(const QDateTime &) {
+    loadBill();
 }

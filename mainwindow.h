@@ -43,6 +43,7 @@ private slots:
     void on_btnFilterHistory_clicked();
     void on_btnRefreshHistory_clicked();
     void on_btnSetCleaning_clicked();
+    void on_valStayCheckOut_dateTimeChanged(const QDateTime &);
 private:
     Ui::MainWindow *ui;
     QVector<Room> rooms;

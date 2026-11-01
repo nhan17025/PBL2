@@ -9,6 +9,8 @@ RoomDialog::RoomDialog(const QVector<Room> &rooms,bool editMode, QWidget *parent
     , editMode(editMode)
 {
     ui->setupUi(this);
+    ui->spinFloor->setReadOnly(true);
+    ui->spinFloor->setButtonSymbols(QAbstractSpinBox::NoButtons);
     if (editMode) {
         ui->btnAdd->setText("Save");
     }
@@ -40,6 +42,12 @@ void RoomDialog::on_btnAdd_clicked(){
         QMessageBox::warning(this, "Lỗi", "Vui lòng nhập số phòng!");
         return;
     }
+    bool ok;
+    int so = roomNumber.toInt(&ok);
+    if (!ok || so < 100) {
+        QMessageBox::warning(this, "Lỗi", "Số phòng phải là số có ít nhất 3 chữ số (VD: 102, 305)!");
+        return;
+    }
     for (const Room &room : rooms) {
         if (room.getroomNumber() == roomNumber && editMode == false) {
             QMessageBox::warning(this, "Lỗi",
@@ -68,12 +76,10 @@ void RoomDialog::setRoomData(QString &roomnumber, QString &roomtype, int floor, 
         ui->cbState->setEnabled(false);
         ui->txtRoomNumber->setEnabled(false);
         ui->cbRoomType->setEnabled(false);
-        ui->spinFloor->setEnabled(false);
     } else {
         ui->cbState->setEnabled(true);
         ui->txtRoomNumber->setEnabled(true);
         ui->cbRoomType->setEnabled(true);
-        ui->spinFloor->setEnabled(true);
     }
 }
 void RoomDialog::setRoomPrices(const QVector<RoomPrice>& p) {
@@ -90,4 +96,13 @@ void RoomDialog::updateRoomPrice() {
         if (rp.getRoomType() == roomType) { price = rp.getPrice(); break; }
     }
     ui->spinPrice->setText(QString::number(price, 'f', 0));
+}
+void RoomDialog::on_txtRoomNumber_textChanged(const QString &text) {
+    bool ok;
+    int so = text.trimmed().toInt(&ok);
+    if (ok && so >= 100) {
+        ui->spinFloor->setValue(so / 100);
+    } else {
+        ui->spinFloor->setValue(0);
+    }
 }
