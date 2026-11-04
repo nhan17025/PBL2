@@ -451,6 +451,10 @@ void MainWindow::on_btnConfirmBooking_clicked() {
     loadORooms();
 }
 void MainWindow::on_btnAddService_clicked(){
+    if (ui->cbServiceRoom->count() == 0) {
+        QMessageBox::warning(this, "Không có khách", "Hiện không có phòng nào đang có khách!");
+        return;
+    }
     QString roomNumber = ui->cbServiceRoom->currentData().toString();
     if (roomNumber.isEmpty()) {
         QMessageBox::warning(this, "Cảnh báo", "Vui lòng chọn phòng cần gọi dịch vụ!");
@@ -731,7 +735,14 @@ void MainWindow::on_cbServiceName_currentIndexChanged(int)
 }
 void MainWindow::on_btnCheckOutAndPrint_clicked() {
     QString phong = ui->cbServiceRoom->currentData().toString();
-    if (phong.isEmpty()) return;
+    if (ui->cbServiceRoom->count() == 0) {
+        QMessageBox::warning(this, "Không có khách", "Hiện không có phòng nào đang có khách để thanh toán!");
+        return;
+    }
+    if (phong.isEmpty()) {
+        QMessageBox::warning(this, "Chưa chọn phòng", "Vui lòng chọn phòng cần thanh toán!");
+        return;
+    }
     QDateTime gioNhan = QDateTime::fromString(ui->valStayCheckIn->text(), "dd/MM/yyyy HH:mm");
     if (ui->valStayCheckOut->dateTime() < gioNhan) {
         QMessageBox::warning(this, "Sai giờ trả phòng", "Giờ trả phòng thực tế không được trước giờ nhận phòng!");
@@ -744,13 +755,17 @@ void MainWindow::on_btnCheckOutAndPrint_clicked() {
         payment = new CashPayment();
     } else if (phuongThuc == "Chuyển khoản") {
         payment = new TransferPayment();
+    } else if (phuongThuc == "Thẻ (POS)") {
+        payment = new CardPayment();
     }
-    if (payment != nullptr) {
-        bool thanhcong = payment->processPayment(tongTien);
-        delete payment;
-        if (!thanhcong) {
-            return;
-        }
+    if (payment == nullptr) {
+        QMessageBox::warning(this, "Lỗi", "Phương thức thanh toán không hợp lệ!");
+        return;
+    }
+    bool thanhcong = payment->processPayment(tongTien);
+    delete payment;
+    if (!thanhcong) {
+        return;
     }
     QString cccdKhach;
     for (const guest &k : guests) {
@@ -800,6 +815,14 @@ void MainWindow::on_btnCheckOutAndPrint_clicked() {
     loadAvaiRooms();
     ui->cbServiceRoom->setCurrentIndex(-1);
     ui->tableRoomServices->setRowCount(0);
+    QString thongBao = "Phòng " + phong + " đã thanh toán bằng " + phuongThuc + ".\n";
+    if (tongTien >= 0) {
+        thongBao += "Số tiền thu: " + QString::number(tongTien, 'f', 0) + " VNĐ\n";
+    } else {
+        thongBao += "Trả lại khách: " + QString::number(-tongTien, 'f', 0) + " VNĐ\n";
+    }
+    thongBao += "Hóa đơn đã được lưu vào Lịch sử thanh toán.";
+    QMessageBox::information(this, "Thanh toán thành công", thongBao);
 }
 void MainWindow::saveHistory() {
     QJsonArray array;
