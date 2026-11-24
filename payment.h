@@ -46,4 +46,16 @@ public:
         return false;
     }
 };
+class CardPayment : public PaymentMethod {
+public:
+    QString getMethodName() const override {
+        return "Thẻ (POS)";
+    }
+    bool processPayment(double amount) override {
+        int ret = QMessageBox::question(nullptr, "Thanh toán bằng thẻ",
+            QString("Số tiền cần quẹt: %1 VNĐ\nĐã quẹt thẻ thành công?").arg(QString::number(amount, 'f', 0)),
+            QMessageBox::Yes | QMessageBox::No);
+        return ret == QMessageBox::Yes;
+    }
+};
 #endif // PAYMENT_H

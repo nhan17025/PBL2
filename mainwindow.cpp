@@ -11,11 +11,33 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this); // Thiết lập các thành phần giao diện từ file .ui
+    QFile file3("hotel_style.qss");
+    this->setWindowIcon(QIcon("hotel.ico"));
+    ui->tabWidget->setIconSize(QSize(15, 15));
+    ui->tabWidget->setTabIcon(0, QIcon("icons/rooms.png"));     // Quản Lý Sơ Đồ Phòng
+    ui->tabWidget->setTabIcon(1, QIcon("icons/checkin.png"));   // Check-In
+    ui->tabWidget->setTabIcon(2, QIcon("icons/billing.png"));   // Dịch Vụ Và Hóa Đơn
+    ui->tabWidget->setTabIcon(3, QIcon("icons/report.png"));    // Thống Kê Và Báo Cáo
+    ui->tabWidget->setTabIcon(4, QIcon("icons/history.png"));   // Lịch Sử Thanh Toán
+    ui->tabWidget->setTabIcon(5, QIcon("icons/setting.png"));  // Quản Lý Giá Các Danh Mục
+    if (file3.open(QFile::ReadOnly | QFile::Text)) {
+        QString styleSheet = QString::fromUtf8(file3.readAll());
+        qApp->setStyleSheet(styleSheet);
+        file3.close();
+    }
     ui->tableRooms->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableRoomTypePrice->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     ui->tableRoomTypePrice->horizontalHeader()->setStretchLastSection(true);
     ui->tableServicePrice->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     ui->tableServicePrice->horizontalHeader()->setStretchLastSection(true);
+    ui->tableRoomServices->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    ui->tableRoomServices->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    ui->tableRoomServices->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+    ui->tableRoomServices->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+    ui->tableReportDetail->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableHistory->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->tableHistory->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    ui->tableBookings->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     loadguest();
     loadRooms();
     loadAvaiRooms();
@@ -23,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
     loadRoomServices();
     showRoomServices();
     loadBill();
+    loadcustomer();
     QFile file("roomprices.json");
     if (!file.exists() || file.size() == 0) {
         initRoomPrices();
@@ -39,11 +62,15 @@ MainWindow::MainWindow(QWidget *parent)
     }
     on_cbServiceName_currentIndexChanged(0);
     loadHistory();
+    loadrevenue();
+    ui->dtReportFrom->setDate(QDate::currentDate().addDays(-30));
+    ui->dtReportTo->setDate(QDate::currentDate());
     ui->dtHistoryFrom->setDate(QDate::currentDate().addDays(-30));
     ui->dtHistoryTo->setDate(QDate::currentDate());
     ui->dtCheckIn->setDateTime(QDateTime::currentDateTime());
     ui->dtCheckIn->setEnabled(false);
     ui->dtCheckOut->setDateTime(QDateTime::currentDateTime().addDays(1));
+    loadThongKe();
 }
 
 MainWindow::~MainWindow() {
@@ -303,6 +330,10 @@ void MainWindow::on_btnAddRoom_clicked()
 void MainWindow::on_btnDeleteRoom_clicked(){
     for (int i =ui->tableRooms->rowCount()-1; i >= 0;i--){
         if (ui->tableRooms->selectionModel()->isRowSelected(i, QModelIndex())){
+            if (ui->tableRooms->item(i, 4)->text() == "Đang có khách (Occupied)") {
+                QMessageBox::warning(this, "Cảnh báo", "Khong the xoa phong dang co khach!");
+                return;
+            }
             ui->tableRooms->removeRow(i);
             rooms.removeAt(i);
         }
@@ -325,6 +356,12 @@ void MainWindow::on_btnEditRoom_clicked(){
         dialog.setRoomData(rnm,rt,flo,pr,st);
         if (dialog.exec() == QDialog::Accepted) {
             QString roomnumber = dialog.getRoomNumber();
+            for (Room &r : rooms) {
+                if (r.getroomNumber() == roomnumber && roomnumber != rnm) {
+                    QMessageBox::critical(this, "Lỗi", "Số phòng đã tồn tại!");
+                    return;
+                }
+            }
             QString roomtype = dialog.getRoomType();
             int floor = dialog.getFloor();
             double price = dialog.getPrice();
@@ -367,12 +404,11 @@ void MainWindow::on_btnRefreshRooms_clicked() {
 }
 void MainWindow::on_btnConfirmBooking_clicked() {
     guest khach;
-
-    QString gname = ui->txtGuestName->text();
-    QString cccd = ui->txtGuestID->text();
-    QString sdt = ui->txtGuestPhone->text();
+    QString gname = ui->txtGuestName->text().trimmed();
+    QString cccd = ui->txtGuestID->text().trimmed();
+    QString sdt = ui->txtGuestPhone->text().trimmed();
     QString room = ui->cbSelectRoom->currentText();
-    QDateTime  nroom = ui->dtCheckIn->dateTime();
+    QDateTime  nroom = QDateTime::currentDateTime();
     QDateTime troom = ui->dtCheckOut->dateTime();
     double tiencoc = ui->spinDeposit->value();
     QString roomdata = ui->cbSelectRoom->currentData().toString();
@@ -380,6 +416,53 @@ void MainWindow::on_btnConfirmBooking_clicked() {
         QMessageBox::warning(this, "Thiếu thông tin", "Vui lòng nhập đầy đủ Tên khách hàng, SDT và số CCCD trước khi nhận phòng");
         return;
     }
+    bool cccdHopLe = (cccd.length() == 12);
+    for (QChar ch : cccd) {
+        if (!ch.isDigit()) cccdHopLe = false;
+    }
+    if (!cccdHopLe) {
+        QMessageBox::warning(this, "Sai CCCD", "Số CCCD phải gồm đúng 12 chữ số!");
+        return;
+    }
+    bool sdtHopLe = (sdt.length() == 10 && sdt[0] == '0');
+    for (QChar ch : sdt) {
+        if (!ch.isDigit()) sdtHopLe = false;
+    }
+    if (!sdtHopLe) {
+        QMessageBox::warning(this, "Sai SĐT", "Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng 0!");
+        return;
+    }
+    if (roomdata.isEmpty()) {
+        QMessageBox::warning(this, "Chưa có phòng", "Không có phòng trống nào được chọn. Vui lòng chọn phòng trước khi nhận phòng!");
+        return;
+    }
+    if (troom <= nroom) {
+        QMessageBox::warning(this, "Sai ngày", "Ngày trả phòng dự kiến phải sau thời điểm nhận phòng!");
+        return;
+    }
+    for (const guest &k : guests) {
+        if (k.getcccd() == cccd) {
+            QMessageBox::warning(this, "Trùng CCCD", "Số CCCD này đang ở phòng " + k.getroom() + "!");
+            return;
+        }
+        if (k.getsdt() == sdt) {
+            QMessageBox::warning(this, "Trùng SĐT", "Số điện thoại này đang ở phòng " + k.getroom() + "!");
+            return;
+        }
+    }
+    bool daCo = false;
+    for (customer &c : danhba) {
+        if (c.getCccd() == cccd) {
+            c.setName(gname);
+            c.setSdt(sdt);
+            daCo = true;
+            break;
+        }
+    }
+    if (!daCo) {
+        danhba.append(customer(gname, cccd, sdt));
+    }
+    savecustomer();
     khach.setgname(gname);
     khach.setcccd(cccd);
     khach.setsdt(sdt);
@@ -395,7 +478,7 @@ void MainWindow::on_btnConfirmBooking_clicked() {
     ui->tableBookings->setItem(row,0,new QTableWidgetItem(gname));
     ui->tableBookings->setItem(row,1,new QTableWidgetItem(cccd));
     ui->tableBookings->setItem(row,2,new QTableWidgetItem(sdt));
-    ui->tableBookings->setItem(row,3,new QTableWidgetItem(room));
+    ui->tableBookings->setItem(row,3,new QTableWidgetItem(roomdata));
     ui->tableBookings->setItem(row,4,new QTableWidgetItem(nroom.toString("dd/MM/yyyy HH:mm")));
     ui->tableBookings->setItem(row,5,new QTableWidgetItem(troom.toString("dd/MM/yyyy HH:mm")));
     ui->tableBookings->setItem(row,6,new QTableWidgetItem(QString::number(tiencoc)));
@@ -408,6 +491,8 @@ void MainWindow::on_btnConfirmBooking_clicked() {
     ui->txtGuestID->clear();
     ui->txtGuestPhone->clear();
     ui->spinDeposit->setValue(0);
+    ui->dtCheckIn->setDateTime(QDateTime::currentDateTime());
+    ui->dtCheckOut->setDateTime(QDateTime::currentDateTime().addDays(1));
     saveRooms();
     loadRooms();
     loadAvaiRooms();
@@ -415,6 +500,10 @@ void MainWindow::on_btnConfirmBooking_clicked() {
     loadORooms();
 }
 void MainWindow::on_btnAddService_clicked(){
+    if (ui->cbServiceRoom->count() == 0) {
+        QMessageBox::warning(this, "Không có khách", "Hiện không có phòng nào đang có khách!");
+        return;
+    }
     QString roomNumber = ui->cbServiceRoom->currentData().toString();
     if (roomNumber.isEmpty()) {
         QMessageBox::warning(this, "Cảnh báo", "Vui lòng chọn phòng cần gọi dịch vụ!");
@@ -464,6 +553,7 @@ void MainWindow::showRoomServices() {
     }
 }
 void MainWindow::on_cbServiceRoom_currentIndexChanged(int index){
+    ui->valStayCheckOut->setDateTime(QDateTime::currentDateTime());
     showRoomServices();
     loadBill();
 }
@@ -506,9 +596,8 @@ void MainWindow::loadBill(){
     ui->valStayRate->setText(QString::number(roomb.getroomprice(),'f',0));
     ui->valStayCheckIn->setText(khachb.getnroom().toString("dd/MM/yyyy HH:mm"));
     ui->valStayPlannedCheckOut->setText(khachb.gettroom().toString("dd/MM/yyyy HH:mm"));
-    ui->valStayCheckOut->setText(QDateTime::currentDateTime().toString("dd/MM/yyyy HH:mm"));
     QDateTime nhan = khachb.getnroom();
-    QDateTime tra  = QDateTime::currentDateTime();
+    QDateTime tra  = ui->valStayCheckOut->dateTime();
     qint64 soNgay = nhan.date().daysTo(tra.date());
     if (tra.time() > QTime(12, 0)) soNgay += 1;
     if (soNgay < 1) soNgay = 1;
@@ -524,7 +613,7 @@ void MainWindow::loadBill(){
     ui->txtPrepaidDeposit->setText(QString::number(khachb.gettiencoc()));
     ui->txtRoomCharge->setText(QString::number(soNgay*roomb.getroomprice(),'f',0));
     double discount = ui->spinDiscount->value();
-    double tong = ((soNgay*roomb.getroomprice() + sum) - khachb.gettiencoc()) * (100 - discount)/100;
+    double tong = (soNgay*roomb.getroomprice() + sum) * (100 - discount)/100 - khachb.gettiencoc();
     ui->txtFinalTotal->setText(QString::number(tong,'f',0));
 }
 void MainWindow::on_spinDiscount_valueChanged(int index){
@@ -695,7 +784,19 @@ void MainWindow::on_cbServiceName_currentIndexChanged(int)
 }
 void MainWindow::on_btnCheckOutAndPrint_clicked() {
     QString phong = ui->cbServiceRoom->currentData().toString();
-    if (phong.isEmpty()) return;
+    if (ui->cbServiceRoom->count() == 0) {
+        QMessageBox::warning(this, "Không có khách", "Hiện không có phòng nào đang có khách để thanh toán!");
+        return;
+    }
+    if (phong.isEmpty()) {
+        QMessageBox::warning(this, "Chưa chọn phòng", "Vui lòng chọn phòng cần thanh toán!");
+        return;
+    }
+    QDateTime gioNhan = QDateTime::fromString(ui->valStayCheckIn->text(), "dd/MM/yyyy HH:mm");
+    if (ui->valStayCheckOut->dateTime() < gioNhan) {
+        QMessageBox::warning(this, "Sai giờ trả phòng", "Giờ trả phòng thực tế không được trước giờ nhận phòng!");
+        return;
+    }
     double tongTien = ui->txtFinalTotal->text().toDouble();
     QString phuongThuc = ui->cbPaymentMethod->currentText();
     PaymentMethod* payment = nullptr;
@@ -703,13 +804,17 @@ void MainWindow::on_btnCheckOutAndPrint_clicked() {
         payment = new CashPayment();
     } else if (phuongThuc == "Chuyển khoản") {
         payment = new TransferPayment();
+    } else if (phuongThuc == "Thẻ (POS)") {
+        payment = new CardPayment();
     }
-    if (payment != nullptr) {
-        bool thanhcong = payment->processPayment(tongTien);
-        delete payment;
-        if (!thanhcong) {
-            return;
-        }
+    if (payment == nullptr) {
+        QMessageBox::warning(this, "Lỗi", "Phương thức thanh toán không hợp lệ!");
+        return;
+    }
+    bool thanhcong = payment->processPayment(tongTien);
+    delete payment;
+    if (!thanhcong) {
+        return;
     }
     QString cccdKhach;
     for (const guest &k : guests) {
@@ -723,15 +828,17 @@ void MainWindow::on_btnCheckOutAndPrint_clicked() {
     newBill.setCccd(cccdKhach);
     newBill.setRoomNumber(phong);
     newBill.setCheckIn(QDateTime::fromString(ui->valStayCheckIn->text(), "dd/MM/yyyy HH:mm"));
-    newBill.setCheckOut(QDateTime::currentDateTime());
+    newBill.setCheckOut(ui->valStayCheckOut->dateTime());
     newBill.setRoomCharge(ui->txtRoomCharge->text().toDouble());
     newBill.setServiceCharge(ui->txtServiceCharge->text().toDouble());
     newBill.setDiscount(ui->spinDiscount->value());
-    newBill.setTotalAmount(tongTien);
+    newBill.setTotalAmount(tongTien + ui->txtPrepaidDeposit->text().toDouble());
     newBill.setPaymentMethod(phuongThuc);
     histories.append(newBill);
     saveHistory();
+    saverevenue();
     showHistory();
+    loadrevenue();
     for (int i = 0; i < roomservices.size(); ++i) {
         if (roomservices[i].getroom() == phong) {
             roomservices.removeAt(i);
@@ -759,6 +866,14 @@ void MainWindow::on_btnCheckOutAndPrint_clicked() {
     loadAvaiRooms();
     ui->cbServiceRoom->setCurrentIndex(-1);
     ui->tableRoomServices->setRowCount(0);
+    QString thongBao = "Phòng " + phong + " đã thanh toán bằng " + phuongThuc + ".\n";
+    if (tongTien >= 0) {
+        thongBao += "Số tiền thu: " + QString::number(tongTien, 'f', 0) + " VNĐ\n";
+    } else {
+        thongBao += "Trả lại khách: " + QString::number(-tongTien, 'f', 0) + " VNĐ\n";
+    }
+    thongBao += "Hóa đơn đã được lưu vào Lịch sử thanh toán.";
+    QMessageBox::information(this, "Thanh toán thành công", thongBao);
 }
 void MainWindow::saveHistory() {
     QJsonArray array;
@@ -871,4 +986,171 @@ void MainWindow::on_btnSetCleaning_clicked(){
     saveRooms();
     loadRooms();
     loadAvaiRooms();
+}
+void MainWindow::on_valStayCheckOut_dateTimeChanged(const QDateTime &) {
+    loadBill();
+}
+void MainWindow::saverevenue(){
+    revenueList.clear();
+    for (const History &his : histories){
+        bool check = false;
+        for (Revenue &rev : revenueList) {
+            if (his.getCheckOut().date() == rev.getDate()) {
+                rev.addInvoice(his);
+                check = true;
+                break;
+            }
+        }
+        if (check) continue;
+        Revenue rev(his.getCheckOut().date());
+        rev.addInvoice(his);
+        revenueList.append(rev);
+    }
+    QJsonArray array;
+    for (Revenue &rev : revenueList){
+        QJsonObject ob;
+        ob["Date"] = rev.getDate().toString("dd/MM/yyyy");;
+        ob["Number"] = rev.getInvoiceCount();
+        ob["RoomRevenue"] = rev.getRoomRevenue();
+        ob["ServiceRevenue"] = rev.getServiceRevenue();
+        ob["Total"] = rev.getTotalRevenue();
+        array.append(ob);
+    }
+    QJsonDocument doc(array);
+    QFile file ("revenue.json");
+    if (file.open(QIODevice::WriteOnly))
+    {
+        file.write(doc.toJson());
+        file.close();
+    }
+}
+void MainWindow::loadrevenue() {
+    QFile file("revenue.json");
+    if (!file.open(QIODevice::ReadOnly)) return;
+    QByteArray data = file.readAll();
+    file.close();
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    if (!doc.isArray()) return;
+    QJsonArray array = doc.array();
+    revenueList.clear();
+    for (const QJsonValue &value : array) {
+        QJsonObject obj = value.toObject();
+        Revenue rev(QDate::fromString(obj["Date"].toString(), "dd/MM/yyyy"));
+        rev.setInvoiceCount(obj["Number"].toInt());
+        rev.setRoomRevenue(obj["RoomRevenue"].toDouble());
+        rev.setServiceRevenue(obj["ServiceRevenue"].toDouble());
+        rev.setTotalRevenue(obj["Total"].toDouble());
+        revenueList.append(rev);
+    }
+    showrevenue();
+}
+void MainWindow::showrevenue() {
+    ui->tableReportDetail->setRowCount(0);
+    for (const Revenue &rev : revenueList) {
+        int row = ui->tableReportDetail->rowCount();
+        ui->tableReportDetail->insertRow(row);
+        ui->tableReportDetail->setItem(row, 0, new QTableWidgetItem(rev.getDate().toString("dd/MM/yyyy")));
+        ui->tableReportDetail->setItem(row, 1, new QTableWidgetItem(QString::number(rev.getInvoiceCount())));
+        ui->tableReportDetail->setItem(row, 2, new QTableWidgetItem(QString::number(rev.getRoomRevenue(), 'f', 0)));
+        ui->tableReportDetail->setItem(row, 3, new QTableWidgetItem(QString::number(rev.getServiceRevenue(), 'f', 0)));
+        ui->tableReportDetail->setItem(row, 4, new QTableWidgetItem(QString::number(rev.getTotalRevenue(), 'f', 0)));
+    }
+}
+void MainWindow::savecustomer(){
+    QJsonArray array;
+    for (customer &nguoi : danhba){
+        QJsonObject ob;
+        ob["HoTen"] = nguoi.getName();
+        ob["CCCD"] = nguoi.getCccd();
+        ob["SDT"] = nguoi.getSdt();
+        array.append(ob);
+    }
+    QJsonDocument doc(array);
+    QFile file ("danhba.json");
+    if (file.open(QIODevice::WriteOnly))
+    {
+        file.write(doc.toJson());
+        file.close();
+    }
+}
+void MainWindow::loadcustomer() {
+    QFile file("danhba.json");
+    if (!file.open(QIODevice::ReadOnly)) return;
+    QByteArray data = file.readAll();
+    file.close();
+    QJsonDocument doc = QJsonDocument::fromJson(data);
+    if (!doc.isArray()) return;
+    QJsonArray array = doc.array();
+    danhba.clear();
+    for (const QJsonValue &value : array) {
+        QJsonObject obj = value.toObject();
+        customer nguoi(obj["HoTen"].toString(), obj["CCCD"].toString(), obj["SDT"].toString());
+        danhba.append(nguoi);
+    }
+}
+void MainWindow::on_txtGuestID_textChanged() {
+    QString cccd = ui->txtGuestID->text().trimmed();
+    if (cccd.length() == 12) {
+        for (const customer &c : danhba) {
+            if (c.getCccd() == cccd) {
+                ui->txtGuestName->setText(c.getName());
+                ui->txtGuestPhone->setText(c.getSdt());
+                return;
+            }
+        }
+    }
+}
+void MainWindow::on_btnGenerateReport_clicked() {
+    loadThongKe();
+}
+void MainWindow::loadThongKe() {
+    QDate fromDate = ui->dtReportFrom->date();
+    QDate toDate = ui->dtReportTo->date();
+
+    if (fromDate > toDate) {
+        QMessageBox::warning(this, "Sai ngày", "Ngày bắt đầu không được lớn hơn ngày kết thúc!");
+        return;
+    }
+    double tongDoanhThu = 0;
+    int luotKhach = 0;
+    ui->tableReportDetail->setRowCount(0);
+    for (const Revenue &rev : revenueList) {
+        if (rev.getDate() >= fromDate && rev.getDate() <= toDate) {
+            int row = ui->tableReportDetail->rowCount();
+            ui->tableReportDetail->insertRow(row);
+            ui->tableReportDetail->setItem(row, 0, new QTableWidgetItem(rev.getDate().toString("dd/MM/yyyy")));
+            ui->tableReportDetail->setItem(row, 1, new QTableWidgetItem(QString::number(rev.getInvoiceCount())));
+            ui->tableReportDetail->setItem(row, 2, new QTableWidgetItem(QString::number(rev.getRoomRevenue(), 'f', 0)));
+            ui->tableReportDetail->setItem(row, 3, new QTableWidgetItem(QString::number(rev.getServiceRevenue(), 'f', 0)));
+            ui->tableReportDetail->setItem(row, 4, new QTableWidgetItem(QString::number(rev.getTotalRevenue(), 'f', 0)));
+
+            tongDoanhThu += rev.getTotalRevenue();
+            luotKhach += rev.getInvoiceCount();
+        }
+    }
+    int soNgayBaoCao = fromDate.daysTo(toDate) + 1;
+    int tongCongSuat = rooms.size() * soNgayBaoCao;
+    int tongDemDaBan = 0;
+
+    if (tongCongSuat > 0) {
+        for (const History &his : histories) {
+            QDate checkIn = his.getCheckIn().date();
+            QDate checkOut = his.getCheckOut().date();
+            if (checkOut >= fromDate && checkIn <= toDate) {
+                QDate start = (checkIn > fromDate) ? checkIn : fromDate;
+                QDate end = (checkOut < toDate) ? checkOut : toDate;
+                int soDem = start.daysTo(end);
+                if (soDem == 0) soDem = 1;
+                tongDemDaBan += soDem;
+            }
+        }
+    }
+    double tyLeLapDay = 0.0;
+    if (tongCongSuat > 0) {
+        tyLeLapDay = (static_cast<double>(tongDemDaBan) / tongCongSuat) * 100.0;
+        if (tyLeLapDay > 100.0) tyLeLapDay = 100.0;
+    }
+    ui->lblTotalRevenueVal->setText(QString::number(tongDoanhThu, 'f', 0) + " VNĐ");
+    ui->lblOccupancyVal->setText(QString::number(tyLeLapDay, 'f', 1) + " %");
+    ui->lblGuestCountVal->setText(QString::number(luotKhach) + " lượt");
 }

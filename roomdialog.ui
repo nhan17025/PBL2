@@ -6,182 +6,186 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>350</width>
-    <height>300</height>
+    <width>400</width>
+    <height>320</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Thêm/Sửa Phòng</string>
   </property>
-  <widget class="QLabel" name="labelRoomNumber">
-   <property name="geometry">
-    <rect>
-     <x>30</x>
-     <y>40</y>
-     <width>71</width>
-     <height>16</height>
-    </rect>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="leftMargin">
+    <number>24</number>
    </property>
-   <property name="text">
-    <string>So phong</string>
+   <property name="topMargin">
+    <number>24</number>
    </property>
-  </widget>
-  <widget class="QLabel" name="labelRoomType">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>80</y>
-     <width>81</width>
-     <height>16</height>
-    </rect>
+   <property name="rightMargin">
+    <number>24</number>
    </property>
-   <property name="text">
-    <string>Loai Phong</string>
+   <property name="bottomMargin">
+    <number>20</number>
    </property>
-  </widget>
-  <widget class="QLabel" name="labelFloor">
-   <property name="geometry">
-    <rect>
-     <x>40</x>
-     <y>120</y>
-     <width>49</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Tang</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="labelPrice">
-   <property name="geometry">
-    <rect>
-     <x>30</x>
-     <y>170</y>
-     <width>49</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Don gia</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="txtRoomNumber">
-   <property name="geometry">
-    <rect>
-     <x>140</x>
-     <y>40</y>
-     <width>113</width>
-     <height>21</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="cbRoomType">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>80</y>
-     <width>171</width>
-     <height>22</height>
-    </rect>
-   </property>
+   
    <item>
-    <property name="text">
-     <string>Phòng Đơn (Single)</string>
-    </property>
+    <layout class="QFormLayout" name="formLayout">
+     <property name="horizontalSpacing">
+      <number>16</number>
+     </property>
+     <property name="verticalSpacing">
+      <number>16</number>
+     </property>
+     
+     <item row="0" column="0">
+      <widget class="QLabel" name="labelRoomNumber">
+       <property name="text">
+        <string>Số phòng:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="txtRoomNumber">
+       <property name="placeholderText">
+        <string>VD: 101, VIP201...</string>
+       </property>
+      </widget>
+     </item>
+     
+     <item row="1" column="0">
+      <widget class="QLabel" name="labelRoomType">
+       <property name="text">
+        <string>Loại phòng:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="cbRoomType">
+       <item>
+        <property name="text">
+         <string>Phòng Đơn (Single)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Phòng Đôi (Double)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Phòng VIP / Suite</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     
+     <item row="2" column="0">
+      <widget class="QLabel" name="labelFloor">
+       <property name="text">
+        <string>Tầng:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QSpinBox" name="spinFloor">
+       <property name="minimum">
+        <number>1</number>
+       </property>
+      </widget>
+     </item>
+     
+     <item row="3" column="0">
+      <widget class="QLabel" name="labelPrice">
+       <property name="text">
+        <string>Đơn giá (VNĐ):</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLineEdit" name="spinPrice">
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+       <property name="placeholderText">
+        <string>Tự động cập nhật theo loại phòng...</string>
+       </property>
+      </widget>
+     </item>
+     
+     <item row="4" column="0">
+      <widget class="QLabel" name="labelState">
+       <property name="text">
+        <string>Trạng thái:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QComboBox" name="cbState">
+       <item>
+        <property name="text">
+         <string>Trống (Available)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Đang dọn dẹp (Cleaning)</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
-    <property name="text">
-     <string>Phòng Đôi (Double)</string>
-    </property>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
    </item>
+   
    <item>
-    <property name="text">
-     <string>Phòng VIP / Suite</string>
-    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnCancel">
+       <property name="text">
+        <string>Hủy Bỏ</string>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnAdd">
+       <property name="text">
+        <string>Lưu Phòng</string>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
-  </widget>
-  <widget class="QSpinBox" name="spinFloor">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>120</y>
-     <width>81</width>
-     <height>22</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btnAdd">
-   <property name="geometry">
-    <rect>
-     <x>160</x>
-     <y>260</y>
-     <width>75</width>
-     <height>24</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Add</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="btnCancel">
-   <property name="geometry">
-    <rect>
-     <x>250</x>
-     <y>260</y>
-     <width>75</width>
-     <height>24</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>cancel</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="labelState">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>220</y>
-     <width>71</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Trang Thai</string>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="cbState">
-   <property name="geometry">
-    <rect>
-     <x>140</x>
-     <y>220</y>
-     <width>181</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <item>
-    <property name="text">
-     <string>Trống (Available)</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Đang dọn dẹp (Cleaning)</string>
-    </property>
-   </item>
-  </widget>
-  <widget class="QLineEdit" name="spinPrice">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>170</y>
-     <width>113</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="readOnly">
-    <bool>true</bool>
-   </property>
-  </widget>
+  </layout>
  </widget>
  <resources/>
  <connections/>

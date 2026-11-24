@@ -11,7 +11,8 @@
 #include "serviceprice.h"
 #include "payment.h"
 #include "history.h"
-
+#include "revenue.h"
+#include "customer.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -43,6 +44,9 @@ private slots:
     void on_btnFilterHistory_clicked();
     void on_btnRefreshHistory_clicked();
     void on_btnSetCleaning_clicked();
+    void on_valStayCheckOut_dateTimeChanged(const QDateTime &);
+    void on_txtGuestID_textChanged();
+    void on_btnGenerateReport_clicked();
 private:
     Ui::MainWindow *ui;
     QVector<Room> rooms;
@@ -67,6 +71,14 @@ private:
     void loadServicePrices();
     void saveServicePrices();
     QVector<History> histories;
+    QVector<Revenue> revenueList;
+    void saverevenue();
+    void loadrevenue();
+    void showrevenue();
+    QVector<customer> danhba;
+    void savecustomer();
+    void loadcustomer();
+    void loadThongKe();
 };
 
 #endif // MAINWINDOW_H

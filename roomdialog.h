@@ -35,6 +35,7 @@ private slots:
     void on_btnAdd_clicked();
     void on_btnCancel_clicked();
     void on_cbRoomType_currentIndexChanged(int);
+    void on_txtRoomNumber_textChanged(const QString &text);
 };
 
 #endif // ROOMDIALOG_H

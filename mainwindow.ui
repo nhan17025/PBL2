@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Hệ Thống Quản Lý Khách Sạn (Hotel Management)</string>
+   <string>Hệ Thống Quản Lý Khách Sạn</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="mainVerticalLayout">
@@ -33,11 +33,11 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="tabRoomStatus">
        <attribute name="title">
-        <string>🏢 Quản Lý Sơ Đồ Phòng</string>
+        <string>Quản Lý Sơ Đồ Phòng</string>
        </attribute>
        <layout class="QVBoxLayout" name="tab1Layout">
         <item>
@@ -125,25 +125,18 @@
            <item>
             <widget class="QPushButton" name="btnSearchRoom">
              <property name="text">
-              <string>🔍 Lọc dữ liệu</string>
+              <string>Lọc dữ liệu</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="btnRefreshRooms">
              <property name="text">
-              <string>🔄 Làm mới</string>
+              <string>Làm mới</string>
              </property>
             </widget>
            </item>
           </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>TextLabel</string>
-          </property>
          </widget>
         </item>
         <item>
@@ -159,6 +152,9 @@
           </property>
           <attribute name="horizontalHeaderDefaultSectionSize">
            <number>170</number>
+          </attribute>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
           </attribute>
           <column>
            <property name="text">
@@ -197,7 +193,7 @@
           <item>
            <widget class="QPushButton" name="btnSetCleaning">
             <property name="text">
-             <string>🧹 Chuyển Dọn Dẹp / Xong</string>
+             <string>Chuyển Dọn Dẹp / Xong</string>
             </property>
            </widget>
           </item>
@@ -217,21 +213,21 @@
           <item>
            <widget class="QPushButton" name="btnAddRoom">
             <property name="text">
-             <string>➕ Thêm Phòng Mới</string>
+             <string>Thêm Phòng Mới</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QPushButton" name="btnEditRoom">
             <property name="text">
-             <string>✏️ Sửa Thông Tin</string>
+             <string>Sửa Thông Tin</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QPushButton" name="btnDeleteRoom">
             <property name="text">
-             <string>🗑️ Xóa Phòng</string>
+             <string>Xóa Phòng</string>
             </property>
            </widget>
           </item>
@@ -241,7 +237,7 @@
       </widget>
       <widget class="QWidget" name="tabBooking">
        <attribute name="title">
-        <string>📝 Đặt Phòng &amp; Check-In</string>
+        <string>Đặt Phòng / Check-In</string>
        </attribute>
        <layout class="QHBoxLayout" name="tab2MainLayout">
         <item>
@@ -357,14 +353,14 @@
              <item>
               <widget class="QPushButton" name="btnConfirmBooking">
                <property name="text">
-                <string>✅ Nhận Phòng (Check-in)</string>
+                <string>Nhận Phòng (Check-in)</string>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QPushButton" name="btnResetBooking">
                <property name="text">
-                <string>❌ Hủy / Làm Lại</string>
+                <string>Hủy / Làm Lại</string>
                </property>
               </widget>
              </item>
@@ -450,7 +446,7 @@
       </widget>
       <widget class="QWidget" name="tabBilling">
        <attribute name="title">
-        <string>💳 Dịch Vụ &amp; Hóa Đơn (Billing)</string>
+        <string>Dịch Vụ Và Hóa Đơn</string>
        </attribute>
        <layout class="QHBoxLayout" name="tab3MainLayout" stretch="1,1">
         <item>
@@ -542,7 +538,7 @@
            <item row="4" column="1">
             <widget class="QPushButton" name="btnAddService">
              <property name="text">
-              <string>➕ Thêm Dịch Vụ Vào Phòng</string>
+              <string>Thêm Dịch Vụ Vào Phòng</string>
              </property>
             </widget>
            </item>
@@ -556,6 +552,9 @@
              </property>
              <attribute name="horizontalHeaderDefaultSectionSize">
               <number>126</number>
+             </attribute>
+             <attribute name="verticalHeaderVisible">
+              <bool>false</bool>
              </attribute>
              <attribute name="verticalHeaderDefaultSectionSize">
               <number>50</number>
@@ -686,8 +685,11 @@
             </widget>
            </item>
            <item row="6" column="1">
-            <widget class="QLineEdit" name="valStayCheckOut">
-             <property name="readOnly">
+            <widget class="QDateTimeEdit" name="valStayCheckOut">
+             <property name="displayFormat">
+              <string>dd/MM/yyyy HH:mm</string>
+             </property>
+             <property name="calendarPopup">
               <bool>true</bool>
              </property>
             </widget>
@@ -862,7 +864,7 @@
                 </size>
                </property>
                <property name="text">
-                <string>🧾 Thanh Toán &amp; Xuất Hóa Đơn</string>
+                <string>Thanh Toán &amp; Xuất Hóa Đơn</string>
                </property>
               </widget>
              </item>
@@ -875,7 +877,7 @@
       </widget>
       <widget class="QWidget" name="tabReports">
        <attribute name="title">
-        <string>📊 Thống Kê &amp; Báo Cáo</string>
+        <string>Thống Kê Và Báo Cáo</string>
        </attribute>
        <layout class="QVBoxLayout" name="tab4MainLayout">
         <item>
@@ -911,14 +913,14 @@
           <item>
            <widget class="QPushButton" name="btnGenerateReport">
             <property name="text">
-             <string>📈 Xem Báo Cáo</string>
+             <string>Xem Báo Cáo</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QPushButton" name="btnExportReportExcel">
             <property name="text">
-             <string>📥 Xuất File Báo Cáo</string>
+             <string>Xuất File Báo Cáo</string>
             </property>
            </widget>
           </item>
@@ -1021,6 +1023,9 @@
           <property name="alternatingRowColors">
            <bool>true</bool>
           </property>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
           <column>
            <property name="text">
             <string>Ngày</string>
@@ -1052,7 +1057,7 @@
       </widget>
       <widget class="QWidget" name="tabHistory">
        <attribute name="title">
-        <string>🧾 Lịch Sử Thanh Toán</string>
+        <string>Lịch Sử Thanh Toán</string>
        </attribute>
        <layout class="QVBoxLayout" name="tab5MainLayout">
         <item>
@@ -1095,14 +1100,14 @@
           <item>
            <widget class="QPushButton" name="btnFilterHistory">
             <property name="text">
-             <string>🔍 Lọc</string>
+             <string>Lọc</string>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QPushButton" name="btnRefreshHistory">
             <property name="text">
-             <string>🔄 Làm mới</string>
+             <string>Làm mới</string>
             </property>
            </widget>
           </item>
@@ -1121,6 +1126,9 @@
           </property>
           <attribute name="horizontalHeaderStretchLastSection">
            <bool>true</bool>
+          </attribute>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
           </attribute>
           <column>
            <property name="text">
@@ -1215,7 +1223,7 @@
       </widget>
       <widget class="QWidget" name="tabPricing">
        <attribute name="title">
-        <string>⚙️ Quản Lý Giá &amp; Danh Mục</string>
+        <string>Quản Lý Giá Các Danh Mục</string>
        </attribute>
        <layout class="QVBoxLayout" name="tab6MainLayout">
         <item>
@@ -1242,6 +1250,9 @@
                </attribute>
                <attribute name="horizontalHeaderStretchLastSection">
                 <bool>true</bool>
+               </attribute>
+               <attribute name="verticalHeaderVisible">
+                <bool>false</bool>
                </attribute>
                <column>
                 <property name="text">
@@ -1321,7 +1332,7 @@
                <item>
                 <widget class="QPushButton" name="btnUpdateRoomType">
                  <property name="text">
-                  <string>💾 Cập Nhật Giá</string>
+                  <string>Cập Nhật Giá</string>
                  </property>
                 </widget>
                </item>
@@ -1349,6 +1360,9 @@
                </property>
                <attribute name="horizontalHeaderStretchLastSection">
                 <bool>true</bool>
+               </attribute>
+               <attribute name="verticalHeaderVisible">
+                <bool>false</bool>
                </attribute>
                <column>
                 <property name="text">
@@ -1438,7 +1452,7 @@
                <item>
                 <widget class="QPushButton" name="btnUpdateServiceCat">
                  <property name="text">
-                  <string>💾 Cập Nhật Giá</string>
+                  <string>Cập Nhật Giá</string>
                  </property>
                 </widget>
                </item>
