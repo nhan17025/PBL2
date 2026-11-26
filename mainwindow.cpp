@@ -38,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->tableHistory->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->tableHistory->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
     ui->tableBookings->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->tableCustomers->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     loadguest();
     loadRooms();
     loadAvaiRooms();
@@ -63,6 +64,7 @@ MainWindow::MainWindow(QWidget *parent)
     on_cbServiceName_currentIndexChanged(0);
     loadHistory();
     loadrevenue();
+    showCustomers();
     ui->dtReportFrom->setDate(QDate::currentDate().addDays(-30));
     ui->dtReportTo->setDate(QDate::currentDate());
     ui->dtHistoryFrom->setDate(QDate::currentDate().addDays(-30));
@@ -498,6 +500,7 @@ void MainWindow::on_btnConfirmBooking_clicked() {
     loadAvaiRooms();
     saveguest();
     loadORooms();
+    showCustomers();
 }
 void MainWindow::on_btnAddService_clicked(){
     if (ui->cbServiceRoom->count() == 0) {
@@ -874,6 +877,7 @@ void MainWindow::on_btnCheckOutAndPrint_clicked() {
     }
     thongBao += "Hóa đơn đã được lưu vào Lịch sử thanh toán.";
     QMessageBox::information(this, "Thanh toán thành công", thongBao);
+    showCustomers();
 }
 void MainWindow::saveHistory() {
     QJsonArray array;
@@ -1095,6 +1099,7 @@ void MainWindow::on_txtGuestID_textChanged() {
             if (c.getCccd() == cccd) {
                 ui->txtGuestName->setText(c.getName());
                 ui->txtGuestPhone->setText(c.getSdt());
+                statusBar()->showMessage("Khách quen: đã tự điền tên và số điện thoại từ danh bạ.", 5000);
                 return;
             }
         }
@@ -1153,4 +1158,82 @@ void MainWindow::loadThongKe() {
     ui->lblTotalRevenueVal->setText(QString::number(tongDoanhThu, 'f', 0) + " VNĐ");
     ui->lblOccupancyVal->setText(QString::number(tyLeLapDay, 'f', 1) + " %");
     ui->lblGuestCountVal->setText(QString::number(luotKhach) + " lượt");
+}
+void MainWindow::showCustomers() {
+    ui->tableCustomers->setRowCount(0);
+    for (const customer &c : danhba) {
+        int soLan = 0;
+        QDateTime lanCuoi;
+        for (const History &his : histories) {
+            if (his.getCccd() == c.getCccd()) {
+                soLan++;
+                if (!lanCuoi.isValid() || his.getCheckOut() > lanCuoi) lanCuoi = his.getCheckOut();
+            }
+        }
+        QString trangThai = "";
+        for (const guest &k : guests) {
+            if (k.getcccd() == c.getCccd()) {
+                trangThai = "Đang ở phòng " + k.getroom();
+                break;
+            }
+        }
+        int row = ui->tableCustomers->rowCount();
+        ui->tableCustomers->insertRow(row);
+        ui->tableCustomers->setItem(row, 0, new QTableWidgetItem(c.getCccd()));
+        ui->tableCustomers->setItem(row, 1, new QTableWidgetItem(c.getName()));
+        ui->tableCustomers->setItem(row, 2, new QTableWidgetItem(c.getSdt()));
+        ui->tableCustomers->setItem(row, 3, new QTableWidgetItem(QString::number(soLan)));
+        ui->tableCustomers->setItem(row, 4, new QTableWidgetItem(lanCuoi.isValid() ? lanCuoi.toString("dd/MM/yyyy HH:mm") : ""));
+        ui->tableCustomers->setItem(row, 5, new QTableWidgetItem(trangThai));
+    }
+    ui->lblCustomerCount->setText("Tổng số khách: " + QString::number(danhba.size()));
+    on_txtSearchCustomer_textChanged(ui->txtSearchCustomer->text());
+}
+void MainWindow::on_txtSearchCustomer_textChanged(const QString &text) {
+    QString tuKhoa = text.trimmed();
+    for (int i = 0; i < ui->tableCustomers->rowCount(); i++) {
+        bool khop = tuKhoa.isEmpty();
+        for (int j = 0; j <= 2 && !khop; j++) {
+            if (ui->tableCustomers->item(i, j)->text().contains(tuKhoa, Qt::CaseInsensitive)) khop = true;
+        }
+        ui->tableCustomers->setRowHidden(i, !khop);
+    }
+}
+void MainWindow::on_btnBookCustomer_clicked() {
+    int row = ui->tableCustomers->currentRow();
+    if (row < 0 || ui->tableCustomers->isRowHidden(row)) {
+        QMessageBox::warning(this, "Chưa chọn khách", "Vui lòng chọn một khách trong danh bạ!");
+        return;
+    }
+    if (!ui->tableCustomers->item(row, 5)->text().isEmpty()) {
+        QMessageBox::warning(this, "Khách đang ở", "Khách này hiện " + ui->tableCustomers->item(row, 5)->text().toLower() + "!");
+        return;
+    }
+    ui->tabWidget->setCurrentWidget(ui->tabBooking);
+    ui->txtGuestID->setText(ui->tableCustomers->item(row, 0)->text());
+    ui->cbSelectRoom->setFocus();
+}
+void MainWindow::on_btnDeleteCustomer_clicked() {
+    int row = ui->tableCustomers->currentRow();
+    if (row < 0 || ui->tableCustomers->isRowHidden(row)) {
+        QMessageBox::warning(this, "Chưa chọn khách", "Vui lòng chọn một khách trong danh bạ!");
+        return;
+    }
+    if (!ui->tableCustomers->item(row, 5)->text().isEmpty()) {
+        QMessageBox::warning(this, "Không thể xóa", "Khách này đang ở khách sạn, không thể xóa!");
+        return;
+    }
+    QString cccd = ui->tableCustomers->item(row, 0)->text();
+    QString ten = ui->tableCustomers->item(row, 1)->text();
+    if (QMessageBox::question(this, "Xác nhận", "Xóa khách " + ten + " (CCCD " + cccd + ") khỏi danh bạ?\nLịch sử thanh toán vẫn được giữ lại.") != QMessageBox::Yes) {
+        return;
+    }
+    for (int i = 0; i < danhba.size(); i++) {
+        if (danhba[i].getCccd() == cccd) {
+            danhba.removeAt(i);
+            break;
+        }
+    }
+    savecustomer();
+    showCustomers();
 }

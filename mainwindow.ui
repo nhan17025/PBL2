@@ -1465,6 +1465,97 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tabCustomers">
+       <attribute name="title">
+        <string>Danh Bạ Khách Hàng</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="tab7MainLayout">
+        <item>
+         <layout class="QHBoxLayout" name="customerTopLayout">
+          <item>
+           <widget class="QLineEdit" name="txtSearchCustomer">
+            <property name="placeholderText">
+             <string>Tìm theo CCCD, tên hoặc số điện thoại...</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnBookCustomer">
+            <property name="text">
+             <string>Đặt phòng cho khách này</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnDeleteCustomer">
+            <property name="text">
+             <string>Xóa khỏi danh bạ</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="tableCustomers">
+          <property name="editTriggers">
+           <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+          </property>
+          <property name="alternatingRowColors">
+           <bool>true</bool>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+          </property>
+          <attribute name="horizontalHeaderStretchLastSection">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+          <column>
+           <property name="text">
+            <string>CCCD</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Họ Tên</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Số Điện Thoại</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Số Lần Đã Ở</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Lần Trả Phòng Gần Nhất</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Trạng Thái</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lblCustomerCount">
+          <property name="text">
+           <string>Tổng số khách: 0</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>

@@ -47,6 +47,9 @@ private slots:
     void on_valStayCheckOut_dateTimeChanged(const QDateTime &);
     void on_txtGuestID_textChanged();
     void on_btnGenerateReport_clicked();
+    void on_txtSearchCustomer_textChanged(const QString &text);
+    void on_btnBookCustomer_clicked();
+    void on_btnDeleteCustomer_clicked();
 private:
     Ui::MainWindow *ui;
     QVector<Room> rooms;
@@ -78,6 +81,7 @@ private:
     QVector<customer> danhba;
     void savecustomer();
     void loadcustomer();
+    void showCustomers();
     void loadThongKe();
 };
 
